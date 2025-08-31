@@ -1,12 +1,8 @@
 variable "internal_domains" {
   default = [
-    "books.homelab",
     "homepage.homelab",
     "vault.homelab",
-    "pass.homelab",
-    "freshrss.homelab",
-    "grafana.homelab",
-    "wallabag.homelab"
+    "freshrss.homelab"
   ]
 }
 
@@ -96,20 +92,6 @@ resource "kubernetes_secret" "freshrss_tls" {
   depends_on = [helm_release.freshrss]
 }
 
-resource "kubernetes_secret" "books_tls" {
-  metadata {
-    name      = "internal-tls"
-    namespace = "booklore"
-  }
-
-  data = {
-    "tls.crt" = tls_locally_signed_cert.internal_tls_cert.cert_pem
-    "tls.key" = tls_private_key.internal_tls_key.private_key_pem
-  }
-
-  type = "kubernetes.io/tls"
-}
-
 resource "kubernetes_secret" "homepage_tls" {
   metadata {
     name      = "internal-tls"
@@ -152,32 +134,4 @@ resource "kubernetes_secret" "vault_tls" {
   type = "kubernetes.io/tls"
 
   depends_on = [helm_release.vault]
-}
-
-resource "kubernetes_secret" "grafana_tls" {
-  metadata {
-    name      = "internal-tls"
-    namespace = "monitoring"
-  }
-
-  data = {
-    "tls.crt" = tls_locally_signed_cert.internal_tls_cert.cert_pem
-    "tls.key" = tls_private_key.internal_tls_key.private_key_pem
-  }
-
-  type = "kubernetes.io/tls"
-}
-
-resource "kubernetes_secret" "vaultwarden_tls" {
-  metadata {
-    name      = "internal-tls"
-    namespace = "vaultwarden"
-  }
-
-  data = {
-    "tls.crt" = tls_locally_signed_cert.internal_tls_cert.cert_pem
-    "tls.key" = tls_private_key.internal_tls_key.private_key_pem
-  }
-
-  type = "kubernetes.io/tls"
 }
