@@ -1,0 +1,89 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  pullPolicy: IfNotPresent
+  tag: "15.5"
+
+service:
+  type: ClusterIP
+  port: 5432
+  targetPort: 5432
+
+# PostgreSQL configuration
+postgresql:
+  # Database configuration - each service will have its own database
+  username: "postgres"
+  # Password will be managed by Vault
+  
+  # Connection settings
+  maxConnections: 100
+  sharedBuffers: "256MB"
+  effectiveCacheSize: "1GB"
+  
+  # Logging
+  logMinDurationStatement: 1000
+  logCheckpoints: true
+  logConnections: true
+  logDisconnections: true
+  
+  # Performance tuning
+  workMem: "4MB"
+  maintenanceWorkMem: "64MB"
+  checkpointCompletionTarget: 0.9
+  walBuffers: "16MB"
+  defaultStatisticsTarget: 100
+
+# Persistent storage
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  accessMode: ReadWriteOnce
+  size: 20Gi
+  mountPath: "/var/lib/postgresql/data"
+
+# Security context
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+# Health checks
+livenessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - postgres
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  exec:
+    command:
+      - pg_isready
+      - -U
+      - postgres
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Environment variables for Vault integration
+env:
+  - name: POSTGRES_USER
+    value: "postgres"
+  - name: POSTGRES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgresql-credentials
+        key: password
+  - name: PGDATA
+    value: "/var/lib/postgresql/data/pgdata"
+
+# Service account for Vault integration
+serviceAccount:
+  create: true
+  name: "postgresql" 

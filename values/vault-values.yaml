@@ -1,0 +1,125 @@
+global:
+  enabled: true
+
+server:
+  enabled: true
+  replicas: 1  # Reduced to 1 for single-node cluster
+  
+  # Production storage backend - using Raft for HA
+  ha:
+    enabled: true
+    replicas: 1  # Reduced to 1 for single-node cluster
+    
+    # Enable Raft integrated storage
+    raft:
+      enabled: true
+      setNodeId: true
+    
+    config: |
+      ui = true
+      
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      listener "tcp" {
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          #tls_disable = 1
+          tls_cert_file = "/vault/tls/vault.crt"
+          tls_key_file  = "/vault/tls/vault.key"
+          tls_client_ca_file = "/vault/tls/ca.crt"
+      }
+      
+      storage "raft" {
+        path = "/vault/data"
+        node_id = "vault-${HOSTNAME}"
+      }
+      
+      service_registration "kubernetes" {}
+  
+  # Disable pod anti-affinity for single-node cluster
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - vault
+          topologyKey: kubernetes.io/hostname
+  
+  # Enable UI
+  ui:
+    enabled: true
+    serviceType: ClusterIP
+  
+  # Service configuration
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8200
+    targetPort: 8200
+  
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  
+  # Service account
+  serviceAccount:
+    create: true
+    name: "vault"
+  
+  # Persistent storage configuration
+  dataStorage:
+    enabled: true
+    storageClass: "local-path"
+    size: 1Gi
+    mountPath: "/vault/data"
+    accessMode: ReadWriteOnce
+  
+  # Ingress configuration for external Caddy
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    hosts:
+      - host: vault.homelab
+        paths:
+          - /
+    tls:
+      - hosts:
+          - vault.homelab
+        secretName: internal-tls
+
+# Injector configuration for automatic secret injection
+injector:
+  enabled: true
+  
+  # Service account for injector
+  serviceAccount:
+    create: true
+    name: "vault-agent-injector"
+  
+  # RBAC configuration
+  rbac:
+    create: true
+  
+  # Service configuration
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 443
+    targetPort: 8080 

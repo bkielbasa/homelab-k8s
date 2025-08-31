@@ -1,0 +1,17 @@
+service:
+  main:
+
+ingress:
+  main:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - host: freshrss.homelab
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - freshrss.homelab
+        secretName: internal-tls
+

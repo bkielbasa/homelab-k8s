@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-init
+  namespace: vault
+spec:
+  template:
+    spec:
+      serviceAccountName: vault
+      containers:
+      - name: vault-init
+        image: hashicorp/vault:1.16.1
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Wait for Vault to be ready
+          until vault status -address=http://vault-0.vault-internal:8200; do`
+            echo "Waiting for Vault to be ready..."
+            sleep 5
+          done
+          
+          # Check if already initialized
+          if vault status -address=http://vault-0.vault-internal:8200 | grep -q "Initialized.*true"; then
+            echo "Vault is already initialized"
+            exit 0
+          fi
+          
+          # Initialize Vault
+          echo "Initializing Vault..."
+          INIT_RESPONSE=$(vault operator init -address=http://vault-0.vault-internal:8200 -key-shares=1 -key-threshold=1 -format=json)
+          
+          # Extract unseal key and root token
+          UNSEAL_KEY=$(echo $INIT_RESPONSE | jq -r '.unseal_keys_b64[0]')
+          ROOT_TOKEN=$(echo $INIT_RESPONSE | jq -r '.root_token')
+          
+          # Unseal Vault
+          echo "Unsealing Vault..."
+          vault operator unseal -address=http://vault-0.vault-internal:8200 $UNSEAL_KEY
+          
+          # Store credentials in a secret (for development only)
+          kubectl create secret generic vault-credentials \
+            --from-literal=unseal-key="$UNSEAL_KEY" \
+            --from-literal=root-token="$ROOT_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          
+          echo "Vault initialization complete"
+        env:
+        - name: VAULT_ADDR
+          value: "http://vault-0.vault-internal:8200"
+      restartPolicy: OnFailure 

@@ -1,0 +1,28 @@
+ingress:
+  enabled: true
+  class: "nginx"
+  ingressClassName: "nginx"
+  additionalAnnotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hostname: pass.klimczak.xyz
+  tlsSecret: "pass-tls"
+
+domain: https://pass.klimczak.xyz
+
+database:
+  type: postgresql
+  existingSecret: "prod-db-connstring"
+  existingSecretKey: "secret-uri"
+
+storage:
+  data:
+    name: "vaultwarden-data"
+    size: "1Gi"
+    class: "local-path"
+    accessMode: ReadWriteOnce
+  attachments:
+    name: "vaultwarden-attachements"
+    size: "1Gi"
+    class: "local-path"
+    accessMode: ReadWriteOnce

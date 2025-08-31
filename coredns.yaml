@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+           lameduck 5s
+        }
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+           pods insecure
+           fallthrough in-addr.arpa ip6.arpa
+           ttl 30
+        }
+        prometheus :9153
+
+        # Forward EVERYTHING to Pi-hole first, then fall back to public DNS.
+        # IMPORTANT: set the Pi-hole IP below.
+        forward . 192.168.1.29 1.1.1.1 9.9.9.9 {
+           policy sequential        # try Pi-hole first; only use next if it fails
+           max_concurrent 1000
+        }
+
+        cache 30 {
+           disable success cluster.local
+           disable denial cluster.local
+        }
+        loop
+        reload
+        loadbalance
+    }
+

@@ -1,0 +1,60 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Secrets and credentials
+secrets/
+credentials/
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.backup
+*.bak
+
+# Kubernetes secrets
+*-secret.yaml
+*-secrets.yaml
+
+# Vault files
+vault-credentials.yaml
+vault-token.txt
+
+# AWS credentials
+.aws/
+aws-credentials
+
+# Local development
+local/
+dev/

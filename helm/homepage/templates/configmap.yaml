@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "homepage.fullname" . }}
+  labels:
+    {{- include "homepage.labels" . | nindent 4 }}
+data:
+  kubernetes.yaml: |
+    mode: cluster
+  settings.yaml: {{ .Values.homepage.settings | quote }}
+  custom.css: {{ .Values.homepage.customCss | quote }}
+  custom.js: {{ .Values.homepage.customJs | quote }}
+
+  bookmarks.yaml: |
+{{ toYaml .Values.homepage.bookmarks | indent 4 }}
+
+  services.yaml: |
+{{ toYaml .Values.homepage.services | indent 4 }}
+
+  widgets.yaml: |
+{{ toYaml .Values.homepage.widgets | indent 4 }}
+
+  docker.yaml: {{ .Values.homepage.docker | quote }}
+
