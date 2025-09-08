@@ -14,6 +14,11 @@ terraform {
       source = "ryanwholey/pihole"
       version = "2.0.0-beta.1"
     }
+
+    ovh = {
+      source = "ovh/ovh"
+      version = "2.7.0"
+    }
   }
 
   # S3 backend configuration for state storage
