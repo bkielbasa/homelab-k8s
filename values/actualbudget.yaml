@@ -18,4 +18,4 @@ ingress:
       hosts:
         - budget.klimczak.xyz
 image:
-  tag: v25.9.0
+  tag: 25.9.0
