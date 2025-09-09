@@ -1,8 +1,7 @@
 persistence:
   enabled: true
   size: 2Gi
-  storageClass: "local-path"
-
+  storageClass: local-path
 ingress:
   enabled: true
   className: nginx
@@ -18,3 +17,5 @@ ingress:
     - secretName: actualbudget-tls
       hosts:
         - budget.klimczak.xyz
+image:
+  tag: v25.9.0
