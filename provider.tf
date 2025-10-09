@@ -10,9 +10,9 @@ provider "helm" {
 
 provider "ovh" {
   endpoint      = "ovh-eu"
-  application_key    = "a80dd5cb6a2fc148"
-  application_secret = "61930e68b0a1fd7e8077e8fcda51f485"
-  consumer_key       = "bd755f3f462b78749ec5d3079c010eaf"
+  application_key    = var.ovh_app_key
+  application_secret = var.ovh_app_secret
+  consumer_key       = var.ovh_consumer_key
 }
 
 data "ovh_me" "myaccount" {}

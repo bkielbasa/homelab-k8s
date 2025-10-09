@@ -27,6 +27,5 @@ terraform {
     key            = "homelab-k8s/terraform.tfstate"
     region         = "eu-central-1"
     encrypt        = true
-    dynamodb_table = "homelab-k8s-terraform-locks"  # Optional: for state locking
   }
 } 

@@ -158,24 +158,24 @@ homepage:
             description: Plex TV
         - Grafana:
             icon: grafana.png
-            href: https://grafana.homelab/
+            href: https://grafana.klimczak.xyz/
             description: Grafana Dashboards
         - FreshRSS:
             icon: freshrss.png
-            href: https://freshrss.homelab/
+            href: https://rss.klimczak.xyz
             description: FreshRSS
         - Pi-hole:
             icon: pi-hole.png
-            href: https://pihole.homelab/
+            href: https://192.168.1.29
             description: Pi hole
         - Transmission:
             icon: transmission.png
             href: http://192.168.1.29:9091/transmission/web
             description: Transmission
-        - Wallabag:
-            icon: wallabag.png
-            href: https://wallabag.homelab
-            description: Wallabag
+        - Budget:
+            icon: actual.png
+            href: https://budget.klimczak.xyz
+            description: Actual (budget)
 
   widgets:
     - kubernetes:
