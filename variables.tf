@@ -17,3 +17,8 @@ variable ovh_consumer_key {
   type = string
   sensitive = true
 }
+
+variable public_ip {
+  type = string
+  default = "212.87.243.126"
+}
