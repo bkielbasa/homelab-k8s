@@ -1,0 +1,12 @@
+auth:
+  enabled: false
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: nfs-client
+
+replica:
+  persistence:
+    enabled: true
+    storageClass: nfs-client
