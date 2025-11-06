@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Config ---
 NAMESPACE="postgresql"
-POD="postgresql-7496bcfc88-p8ln2"
+POD="postgresql-7496bcfc88-blrtm"
 KCTL="kubectl"  # or "kubectl"
 
 if [[ $# -ne 1 ]]; then

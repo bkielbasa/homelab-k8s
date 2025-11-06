@@ -18,3 +18,13 @@ resource "pihole_dns_record" "pass" {
   ip     = "192.168.1.29"
 }
 
+resource "pihole_dns_record" "vault" {
+  domain = "vault.klimczak.xyz"
+  ip     = "192.168.1.29"
+}
+
+resource "pihole_dns_record" "klimczak" {
+  domain = "klimczak.xyz"
+  ip     = "192.168.1.29"
+}
+
