@@ -44,10 +44,17 @@ grafana:
             implementation: prometheus
         - name: "Loki"
           type: loki
+          uid: ef34h0yjkohs0b
           url: "http://loki.monitoring.svc.cluster.local:3100"
-          access: proxy
           isDefault: false
           editable: true
+          jsonData:
+            maxLines: 1000
+            derivedFields:
+              - datasourceUid: prometheus
+                matcherRegex: "traceID=(\\w+)"
+                name: TraceID
+                url: "$${__value.raw}"
 
 prometheus-node-exporter:
   kind: DaemonSet
@@ -60,15 +67,11 @@ prometheus:
     additionalScrapeConfigs:
       - job_name: 'node-exporter'
         static_configs:
-          - targets: ['192.168.1.29:9100','mail.klimczak.xyz:9100', 'lewski.com.pl:9100']
-      - job_name: nginx
-        static_configs:
-          - targets: ['lewski.com.pl:9113']
+          - targets: ['192.168.1.29:9100','mail.klimczak.xyz:9100']
 
-      - job_name: mysql
+      - job_name: pve
         static_configs:
-         - targets: ['lewski.com.pl:9104']
-
+         - targets: ['192.168.1.2:9221']
 alertmanager:
   enabled: true
 

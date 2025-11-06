@@ -10,17 +10,29 @@ resource "helm_release" "prometheus" {
   ]
 }
 
-# resource "helm_release" "loki" {
-#   name       = "loki"
-#   namespace  = "monitoring"
-#   repository = "https://grafana.github.io/helm-charts"
-#   chart      = "loki-stack"
-#   version    = "2.10.2"
+resource "helm_release" "loki" {
+  name       = "loki"
+  namespace  = "monitoring"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "loki"
 
-#   values = [
-#     file("values/loki.yaml")
-#   ]
+  values = [
+    file("values/loki.yaml")
+  ]
+}
 
-#   depends_on = [helm_release.prometheus]
-# }
+resource "helm_release" "alloy" {
+  name       = "alloy"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "alloy"
+  namespace  = "monitoring"
+  version    = "0.9.2"
+  
+  values = [
+    file("values/alloy.yaml")
+  ]
 
+  depends_on = [
+    helm_release.loki
+  ]
+}

@@ -29,7 +29,7 @@ resource "kubernetes_manifest" "metallb_ip_pool" {
       namespace = "metallb"
     }
     spec = {
-      addresses = ["192.168.1.29/32"]
+      addresses = ["192.168.1.29/32", "192.168.1.82/32"]
     }
   }
 }

@@ -1,113 +1,85 @@
 loki:
   auth_enabled: false
+  
   commonConfig:
-    path_prefix: /var/loki
-    storage:
-      filesystem:
-        chunks_directory: /var/loki/chunks
-        rules_directory: /var/loki/rules
     replication_factor: 1
   
-  # Add persistent storage
-  persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: "local-path"
-    accessMode: ReadWriteOnce
-  schema_config:
+  schemaConfig:
     configs:
-      - from: 2020-10-24
-        store: boltdb-shipper
+      - from: 2024-01-01
+        store: tsdb
         object_store: filesystem
-        schema: v11
+        schema: v13
         index:
           prefix: index_
           period: 24h
-  storage_config:
-    boltdb_shipper:
-      active_index_directory: /var/loki/boltdb-shipper-active
-      cache_location: /var/loki/boltdb-shipper-cache
-      cache_ttl: 24h
-      shared_store: filesystem
+  
+  storage:
+    type: filesystem
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
+  
   limits_config:
-    enforce_metric_name: false
     reject_old_samples: true
     reject_old_samples_max_age: 168h
-  chunk_store_config:
-    max_look_back_period: 0s
-  table_manager:
-    retention_deletes_enabled: false
-    retention_period: 0s
+    retention_period: 744h
 
-promtail:
+deploymentMode: SingleBinary
+
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "nfs-client"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+chunksCache:
+  enabled: false
+  replicas: 0
+
+resultsCache:
+  enabled: false
+  replicas: 0
+
+lokiCanary:
   enabled: true
-  config:
-    server:
-      http_listen_port: 9080
-      grpc_listen_port: 0
-    positions:
-      filename: /var/lib/promtail/positions.yaml
-    clients:
-      - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-    scrape_configs:
-      - job_name: kubernetes-pods-name
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels:
-              - __meta_kubernetes_pod_label_app
-            regex: .+
-            action: keep
-          - source_labels:
-              - __meta_kubernetes_pod_container_name
-            regex: .+
-            action: keep
-          - source_labels:
-              - __meta_kubernetes_pod_container_name
-              - __meta_kubernetes_pod_label_app
-            regex: (.+);(.+)
-            target_label: __path__
-            replacement: /var/log/pods/*$2*/$1/*.log
-          - source_labels:
-              - __meta_kubernetes_pod_label_app
-            target_label: app
-          - source_labels:
-              - __meta_kubernetes_pod_name
-            target_label: pod
-          - source_labels:
-              - __meta_kubernetes_namespace
-            target_label: namespace
-          - source_labels:
-              - __meta_kubernetes_pod_container_name
-            target_label: container
-          - source_labels:
-              - __meta_kubernetes_pod_name
-            target_label: job
-            replacement: ${1}
-          - source_labels:
-              - __meta_kubernetes_pod_label_app
-            target_label: job
-            replacement: ${1}
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels:
-              - __meta_kubernetes_namespace
-            action: replace
-            target_label: namespace
-          - source_labels:
-              - __meta_kubernetes_pod_name
-            action: replace
-            target_label: pod
-          - source_labels:
-              - __meta_kubernetes_pod_container_name
-            action: replace
-            target_label: container
-          - replacement: /var/log/pods/*$1*/$2/*.log
-            separator: /
-            source_labels:
-              - __meta_kubernetes_pod_uid
-              - __meta_kubernetes_pod_container_name
-            target_label: __path__
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 50m
+      memory: 32Mi
+
+gateway:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+# Disable Promtail (deprecated)
+promtail:
+  enabled: false
 
 grafana:
-  enabled: false  # Disable Grafana in Loki stack since it's already deployed with Prometheus
+  enabled: false

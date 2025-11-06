@@ -170,12 +170,16 @@ homepage:
             description: Pi hole
         - Transmission:
             icon: transmission.png
-            href: http://192.168.1.29:9091/transmission/web
+            href: http://192.168.1.29:9091/transmission/web/
             description: Transmission
         - Budget:
             icon: actual.png
             href: https://budget.klimczak.xyz
             description: Actual (budget)
+        - Proxmox:
+            icon: proxmox.png
+            href: http://192.168.1.2/
+            description: Proxmox
 
   widgets:
     - kubernetes:

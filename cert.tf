@@ -1,7 +1,6 @@
 variable "internal_domains" {
   default = [
     "homepage.homelab",
-    "vault.homelab"
   ]
 }
 
@@ -87,20 +86,4 @@ resource "kubernetes_secret" "homepage_tls" {
   }
 
   type = "kubernetes.io/tls"
-}
-
-resource "kubernetes_secret" "vault_tls" {
-  metadata {
-    name      = "internal-tls"
-    namespace = "vault"
-  }
-
-  data = {
-    "tls.crt" = tls_locally_signed_cert.internal_tls_cert.cert_pem
-    "tls.key" = tls_private_key.internal_tls_key.private_key_pem
-  }
-
-  type = "kubernetes.io/tls"
-
-  depends_on = [helm_release.vault]
 }
