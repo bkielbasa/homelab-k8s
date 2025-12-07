@@ -1,0 +1,17 @@
+{{- if and .Values.frontend.enabled .Values.frontend.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "blob-storage.fullname" . }}-frontend
+  labels:
+    {{- include "blob-storage.frontend.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - {{ .Values.frontend.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.frontend.persistence.size }}
+  {{- if or .Values.frontend.persistence.storageClass .Values.global.storageClass }}
+  storageClassName: {{ .Values.frontend.persistence.storageClass | default .Values.global.storageClass }}
+  {{- end }}
+{{- end }}

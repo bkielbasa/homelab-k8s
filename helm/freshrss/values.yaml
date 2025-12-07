@@ -9,26 +9,21 @@ service:
   type: ClusterIP
   port: 80
 
-# Database configuration
 database:
   type: "pgsql"  # PostgreSQL
   host: "postgresql.postgresql.svc.cluster.local"
   port: 5432
   name: "freshrss"
   username: "freshrss"
-  # Password will be managed by Vault
 
-# Persistent volume for FreshRSS data directory
 persistence:
   enabled: true
   storageClass: "local-path"
   accessMode: ReadWriteOnce
   size: 1Gi
 
-# Restart policy for handling database credential rotation
 restartPolicy: Always
 
-# Liveness and readiness probes for better health checking
 livenessProbe:
   httpGet:
     path: /
@@ -46,19 +41,4 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-
-ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-  hosts:
-    - host: freshrss.homelab
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls:
-    - hosts:
-        - freshrss.homelab
-      secretName: internal-tls
 

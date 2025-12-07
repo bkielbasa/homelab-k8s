@@ -1,6 +1,10 @@
 alloy:
   configMap:
     content: |
+      // ============================================
+      // LOGS COLLECTION
+      // ============================================
+
       // Discover all Kubernetes pods
       discovery.kubernetes "pods" {
         role = "pod"
@@ -76,21 +80,108 @@ alloy:
         }
       }
 
+      // ============================================
+      // OTEL TRACES & METRICS COLLECTION
+      // ============================================
+
+      // OTLP receiver for traces and metrics
+      otelcol.receiver.otlp "default" {
+        grpc {
+          endpoint = "0.0.0.0:4317"
+        }
+
+        http {
+          endpoint = "0.0.0.0:4318"
+        }
+
+        output {
+          metrics = [otelcol.processor.batch.default.input]
+          traces  = [otelcol.processor.batch.default.input]
+        }
+      }
+
+      // Batch processor for efficiency
+      otelcol.processor.batch "default" {
+        timeout = "5s"
+        send_batch_size = 1024
+
+        output {
+          metrics = [otelcol.exporter.prometheus.default.input]
+          traces  = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+
+      // Export metrics to Prometheus
+      otelcol.exporter.prometheus "default" {
+        forward_to = [prometheus.remote_write.prometheus.receiver]
+      }
+
+      prometheus.remote_write "prometheus" {
+        endpoint {
+          url = "http://prometheus-server.monitoring.svc.cluster.local/api/v1/write"
+
+          // Add basic retry configuration
+          queue_config {
+            capacity = 10000
+            max_shards = 50
+          }
+        }
+      }
+
+      // Export traces to Tempo
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "http://tempo.monitoring.svc.cluster.local:4317"
+
+          tls {
+            insecure = true
+          }
+        }
+      }
+
+  # Extra ports for OTLP receivers
+  extraPorts:
+    - name: "otlp-grpc"
+      port: 4317
+      targetPort: 4317
+      protocol: "TCP"
+    - name: "otlp-http"
+      port: 4318
+      targetPort: 4318
+      protocol: "TCP"
+
 # Deploy as DaemonSet (one pod per node)
 controller:
   type: "daemonset"
 
+# Service configuration
+service:
+  type: ClusterIP
+  # Add OTLP ports to the service
+  ports:
+    otlp-grpc:
+      enabled: true
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    otlp-http:
+      enabled: true
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+
 # Resource limits
 resources:
   requests:
-    cpu: 50m
-    memory: 64Mi
-  limits:
-    cpu: 200m
+    cpu: 100m
     memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
 
 # Allow running on control plane nodes
 tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
     operator: Exists
+

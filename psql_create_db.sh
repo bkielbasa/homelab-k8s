@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Config ---
 NAMESPACE="postgresql"
-POD="postgresql-7496bcfc88-blrtm"
+POD=$(kubectl get pods -n postgresql -o name | head -n1 | cut -d'/' -f2)
 KCTL="kubectl"  # or "kubectl"
 
 if [[ $# -ne 1 ]]; then
@@ -69,6 +69,9 @@ echo "=== PostgreSQL user & database created/updated ==="
 echo "User:       $USER_NAME"
 echo "Database:   $DB_NAME"
 echo "Password:   $PASSWORD"
+echo "Host:       postgresql.postgresql.svc.cluster.local"
+echo "Port:       5432"
+
 echo
 echo "Store this password securely."
 

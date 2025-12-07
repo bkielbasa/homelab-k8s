@@ -1,0 +1,104 @@
+{{- if .Values.chunkserver.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "blob-storage.fullname" . }}-chunkserver
+  labels:
+    {{- include "blob-storage.chunkserver.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "blob-storage.chunkserver.serviceName" . }}
+  replicas: {{ .Values.chunkserver.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "blob-storage.chunkserver.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "blob-storage.chunkserver.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: chunkserver
+        image: {{ include "blob-storage.chunkserver.image" . }}
+        imagePullPolicy: {{ .Values.chunkserver.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.chunkserver.service.port }}
+          protocol: TCP
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE_NAME
+          value: "{{ include "blob-storage.chunkserver.serviceName" . }}"
+        - name: SERVICE_PORT
+          value: "{{ .Values.chunkserver.service.port }}"
+        - name: APP_HOST
+          value: "$(POD_NAME).$(SERVICE_NAME).$(POD_NAMESPACE).svc.cluster.local:$(SERVICE_PORT)"
+        - name: MASTER_URL
+          value: "http://{{ include "blob-storage.master.serviceName" . }}:{{ .Values.master.service.port }}"
+        {{- range $key, $value := .Values.chunkserver.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- if .Values.chunkserver.healthCheck.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.chunkserver.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.chunkserver.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.chunkserver.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.chunkserver.healthCheck.timeoutSeconds }}
+          failureThreshold: {{ .Values.chunkserver.healthCheck.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.chunkserver.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.chunkserver.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.chunkserver.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.chunkserver.healthCheck.timeoutSeconds }}
+          failureThreshold: {{ .Values.chunkserver.healthCheck.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.chunkserver.resources | nindent 10 }}
+        volumeMounts:
+        - name: data
+          mountPath: /app/uploads
+      {{- with .Values.chunkserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.chunkserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.chunkserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.chunkserver.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "blob-storage.chunkserver.labels" . | nindent 8 }}
+    spec:
+      accessModes:
+      - {{ .Values.chunkserver.persistence.accessMode }}
+      resources:
+        requests:
+          storage: {{ .Values.chunkserver.persistence.size }}
+      {{- if or .Values.chunkserver.persistence.storageClass .Values.global.storageClass }}
+      storageClassName: {{ .Values.chunkserver.persistence.storageClass | default .Values.global.storageClass }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+

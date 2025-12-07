@@ -33,6 +33,75 @@ resource "helm_release" "alloy" {
   ]
 
   depends_on = [
-    helm_release.loki
+    helm_release.loki,
+    helm_release.tempo
   ]
+}
+
+resource "helm_release" "tempo" {
+  name       = "tempo"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "tempo"
+  namespace  = "monitoring"
+  version    = "1.10.1"
+  
+  values = [
+    file("values/tempo.yaml")
+  ]
+
+  depends_on = [
+    helm_release.prometheus
+  ]
+}
+
+resource "kubernetes_manifest" "linkerd_proxy_servicemonitor" {
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "linkerd-proxy"
+      namespace = "monitoring"  # or wherever your Prometheus operator is
+      labels = {
+        "app.kubernetes.io/name"      = "linkerd-proxy"
+        "app.kubernetes.io/component" = "proxy"
+      }
+    }
+    spec = {
+      jobLabel = "linkerd-proxy"
+      selector = {
+        matchLabels = {
+          "linkerd.io/control-plane-component" = "proxy"
+        }
+      }
+      namespaceSelector = {
+        any = true  # Monitor all namespaces
+      }
+      endpoints = [
+        {
+          port     = "linkerd-admin"
+          interval = "30s"
+          path     = "/metrics"
+          relabelings = [
+            {
+              sourceLabels = ["__meta_kubernetes_pod_container_name"]
+              action       = "keep"
+              regex        = "^linkerd-proxy$"
+            },
+            {
+              sourceLabels = ["__meta_kubernetes_namespace"]
+              targetLabel  = "namespace"
+            },
+            {
+              sourceLabels = ["__meta_kubernetes_pod_name"]
+              targetLabel  = "pod"
+            },
+            {
+              sourceLabels = ["__meta_kubernetes_pod_label_linkerd_io_proxy_deployment"]
+              targetLabel  = "deployment"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

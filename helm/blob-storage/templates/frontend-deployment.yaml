@@ -1,0 +1,82 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "blob-storage.fullname" . }}-frontend
+  labels:
+    {{- include "blob-storage.frontend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "blob-storage.frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "blob-storage.frontend.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: frontend
+        image: {{ include "blob-storage.frontend.image" . }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 9400
+          protocol: TCP
+        env:
+        {{- range $key, $value := .Values.frontend.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        - name: CLIENT_URL
+          value: "http://{{ include "blob-storage.client.serviceName" . }}:{{ .Values.client.service.port }}"
+        - name: MASTER_URL
+          value: "http://{{ include "blob-storage.master.serviceName" . }}:{{ .Values.master.service.port }}"
+        {{- if .Values.frontend.healthCheck.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.frontend.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.frontend.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.healthCheck.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.healthCheck.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.frontend.healthCheck.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.frontend.healthCheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.healthCheck.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.healthCheck.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads
+        {{- if .Values.frontend.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "blob-storage.fullname" . }}-frontend
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- with .Values.frontend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,218 @@
+# Default values for blob-storage distributed filesystem
+
+global:
+  # Global image registry (can be overridden per service)
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  # Global app version for all images
+  appVersion: "latest"
+
+# Master Server Configuration
+master:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    registry: docker.io
+    repository: bartlomiejklimczak/blob-storage-master
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 9100
+    annotations: {}
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessMode: ReadWriteOnce
+    # storageClass: ""
+
+  env:
+    APP_ENV: production
+    SERVER_HOST: "0.0.0.0"
+    SERVER_PORT: "9100"
+    CHUNK_SIZE: "1048576"
+    REPLICATION_FACTOR: "3"
+    OPLOG_PATH: "/app/data/master-oplog.jsonl"
+    REBALANCE_INTERVAL: "1m"
+    REBALANCE_INITIAL_DELAY: "10s"
+    REBALANCE_THRESHOLD: "0.2"
+    REBALANCE_MAX_MOVES: "10"
+    SERVER_PERMANENT_DEAD_AFTER: "2m"
+    HEARTBEAT_INTERVAL: "30s"
+    LEASE_TIMEOUT: "60s"
+
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Chunk Servers Configuration
+chunkserver:
+  enabled: true
+  replicaCount: 3
+
+  image:
+    registry: docker.io
+    repository: bartlomiejklimczak/blob-storage-chunkserver
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 9900
+    annotations: {}
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteOnce
+    # storageClass: ""
+
+  env:
+    APP_ENV: production
+    SERVER_HOST: "0.0.0.0"
+    SERVER_PORT: "9900"
+    UPLOADS_DIR: "/app/uploads"
+
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Client API Server Configuration
+client:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    registry: docker.io
+    repository: bartlomiejklimczak/blob-storage-client
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 9000
+    annotations: {}
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  env:
+    APP_ENV: production
+    SERVER_HOST: "0.0.0.0"
+    SERVER_PORT: "9000"
+
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Frontend Web UI Configuration
+frontend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    registry: docker.io
+    repository: bartlomiejklimczak/blob-storage-frontend-web
+    pullPolicy: IfNotPresent
+
+  service:
+    type: LoadBalancer
+    port: 9400
+    annotations: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    # Example annotations:
+    # annotations:
+    #   kubernetes.io/ingress.class: nginx
+    #   cert-manager.io/cluster-issuer: letsencrypt-prod
+    #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: blob-storage.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+      # - secretName: blob-storage-tls
+      #   hosts:
+      #     - blob-storage.example.com
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  persistence:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteOnce
+    # storageClass: ""
+
+  env:
+    APP_ENV: production
+    SERVER_HOST: "0.0.0.0"
+    SERVER_PORT: "9400"
+    UPLOADS_DIR: "/app/uploads"
+
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

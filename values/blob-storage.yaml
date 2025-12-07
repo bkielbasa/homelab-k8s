@@ -1,0 +1,46 @@
+global:
+  storageClass: "nfs-client"
+  imageTag: "v0.1.11"
+
+master:
+  labels:
+    prometheus.io/scrape: "true"
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: alloy.monitoring.svc.cluster.local:4317
+
+client:
+  labels:
+    prometheus.io/scrape: "true"
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: alloy.monitoring.svc.cluster.local:4317
+
+chunkserver:
+  labels:
+    prometheus.io/scrape: "true"
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: alloy.monitoring.svc.cluster.local:4317
+
+frontend:
+  labels:
+    prometheus.io/scrape: "true"
+  env:
+    OTEL_EXPORTER_OTLP_ENDPOINT: alloy.monitoring.svc.cluster.local:4317
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      # For SSL with cert-manager
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: bs.klimczak.xyz
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: blob-storage-tls
+        hosts:
+          - bs.klimczak.xyz

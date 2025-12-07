@@ -58,7 +58,6 @@ spec:
             - name: freshrss-data
               mountPath: /var/www/FreshRSS/data
           {{- end }}
-          # Use config.custom.php instead of environment variables
        
           volumeMounts:
             - name: freshrss-data

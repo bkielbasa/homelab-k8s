@@ -1,3 +1,5 @@
+replicas: 4
+
 ingress:
   enabled: true
   class: "nginx"

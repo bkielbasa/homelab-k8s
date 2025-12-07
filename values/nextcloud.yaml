@@ -1,0 +1,192 @@
+appVersion: 32.0.0
+
+hpa:
+  enabled: false
+  minPods: 1
+  maxPods: 1
+
+nextcloud:
+  host: klimczak.xyz
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-admin
+    usernameKey: nextcloud-username
+    passwordKey: nextcloud-password
+  defaultConfigs:
+    imaginary.config.php: true
+    upgrade-disable-web.config.php: false
+    redis.config.php: true
+  configs:
+    custom.config.php: |-
+      <?php
+      $CONFIG = array (
+        'secret' => getenv('NEXTCLOUD_SECRET'),
+        'overwriteprotocol' => 'https',
+        'overwrite.cli.url' => 'https://klimczak.xyz',
+        'trusted_domains' => array (
+          2 => 'klimczak.xyz',
+        ),
+        'trusted_proxies' => array (
+          0 => '10.0.0.0/8',
+        ),
+        'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
+        'memcache.local' => '\OC\Memcache\APCu',
+        'memcache.distributed' => '\OC\Memcache\Redis',
+        'memcache.locking' => '\OC\Memcache\Redis',
+        'default_phone_region' => 'PL',
+        'log_type' => 'errorlog',
+        'loglevel' => 2,
+      );
+  extraEnv:
+  - name: NEXTCLOUD_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-session
+        key: token
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteMany
+  storageClass: "-" 
+  size: 400Gi
+
+  nextcloudData:
+    enabled: false
+
+internalDatabase:
+  enabled: false
+
+redis:
+  enabled: false
+
+externalRedis:
+  enabled: true
+  host: valkey-primary.valkey.svc.cluster.local
+  port: 6379
+  password: NULL
+
+serviceAccount:
+  create: false
+  name: nextcloud
+
+externalDatabase:
+  enabled: true
+  type: postgresql
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-postgres
+    usernameKey: db-username
+    passwordKey: db-password
+    hostKey: db-host
+    databaseKey: db-name
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "16G"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/server-snippet: |-
+      server_tokens off;
+      proxy_hide_header X-Powered-By;
+      rewrite ^/.well-known/webfinger /index.php/.well-known/webfinger last;
+      rewrite ^/.well-known/nodeinfo /index.php/.well-known/nodeinfo last;
+      rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
+      rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json last;
+      
+      # CalDAV and CardDAV autodiscovery
+      location = /.well-known/carddav {
+        return 301 $scheme://$host/remote.php/dav;
+      }
+      location = /.well-known/caldav {
+        return 301 $scheme://$host/remote.php/dav;
+      }
+      
+      # Email autoconfiguration
+      location = /.well-known/autoconfig/mail/config-v1.1.xml {
+        return 301 https://autoconfig.klimczak.xyz/mail/config-v1.1.xml;
+      }
+      location ^~ /mail/config-v1.1.xml {
+        return 200 '<?xml version="1.0" encoding="UTF-8"?>
+        <clientConfig version="1.1">
+          <emailProvider id="klimczak.xyz">
+            <domain>klimczak.xyz</domain>
+            <displayName>klimczak.xyz Mail</displayName>
+            <displayShortName>klimczak.xyz</displayShortName>
+            <incomingServer type="imap">
+              <hostname>mail.klimczak.xyz</hostname>
+              <port>993</port>
+              <socketType>SSL</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </incomingServer>
+            <incomingServer type="imap">
+              <hostname>mail.klimczak.xyz</hostname>
+              <port>143</port>
+              <socketType>STARTTLS</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </incomingServer>
+            <outgoingServer type="smtp">
+              <hostname>mail.klimczak.xyz</hostname>
+              <port>465</port>
+              <socketType>SSL</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </outgoingServer>
+            <outgoingServer type="smtp">
+              <hostname>mail.klimczak.xyz</hostname>
+              <port>587</port>
+              <socketType>STARTTLS</socketType>
+              <authentication>password-cleartext</authentication>
+              <username>%EMAILADDRESS%</username>
+            </outgoingServer>
+          </emailProvider>
+        </clientConfig>';
+        add_header Content-Type "application/xml";
+      }
+      
+      location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+      }
+      location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
+        deny all;
+      }
+      location ~ ^/(?:autotest|occ|issue|indie|db_|console) {
+        deny all;
+      }
+  hosts:
+    - host: klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - klimczak.xyz
+      secretName: klimczak-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 3Gi
+
+cronjob:
+  enabled: true
+  cronjob:
+    schedule: "* * * * *"
+  securityContext:
+    runAsNonRoot: true
+
+imaginary:
+  enabled: true
+  replicaCount: 3

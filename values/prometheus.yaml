@@ -51,10 +51,43 @@ grafana:
           jsonData:
             maxLines: 1000
             derivedFields:
-              - datasourceUid: prometheus
+              - datasourceUid: tempo
+                matcherRegex: "trace_id=(\\w+)"
+                name: TraceID
+                url: "$${__value.raw}"
+              - datasourceUid: tempo
                 matcherRegex: "traceID=(\\w+)"
                 name: TraceID
                 url: "$${__value.raw}"
+        - name: "Tempo"
+          type: tempo
+          uid: tempo
+          url: "http://tempo.monitoring.svc.cluster.local:3100"
+          access: proxy
+          isDefault: false
+          editable: true
+          jsonData:
+            httpMethod: GET
+            tracesToLogs:
+              datasourceUid: ef34h0yjkohs0b  # Your Loki UID
+              tags: ['job', 'instance', 'pod', 'namespace']
+              mappedTags: [{ key: 'service.name', value: 'app' }]
+              mapTagNamesEnabled: false
+              spanStartTimeShift: '1h'
+              spanEndTimeShift: '1h'
+              filterByTraceID: false
+              filterBySpanID: false
+            tracesToMetrics:
+              datasourceUid: prometheus
+              tags: [{ key: 'service.name', value: 'app' }]
+            serviceMap:
+              datasourceUid: prometheus
+            nodeGraph:
+              enabled: true
+            search:
+              hide: false
+            lokiSearch:
+              datasourceUid: ef34h0yjkohs0b
 
 prometheus-node-exporter:
   kind: DaemonSet
@@ -64,10 +97,18 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
   prometheusSpec:
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
     additionalScrapeConfigs:
       - job_name: 'node-exporter'
         static_configs:
           - targets: ['192.168.1.29:9100','mail.klimczak.xyz:9100']
+
+      - job_name: nextcloud
+        static_configs:
+          - targets: ['nextcloud-exporter.nextcloud.svc.cluster.local']
 
       - job_name: pve
         static_configs:

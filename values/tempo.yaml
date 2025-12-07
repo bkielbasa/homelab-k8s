@@ -1,0 +1,32 @@
+tempo:
+  reportingEnabled: false
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://prometheus-kube-prometheus-prometheus.monitoring:9090/api/v1/write"
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: "nfs-client"  # adjust to your storage class
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+traces:
+  otlp:
+    grpc:
+      enabled: true
+    http:
+      enabled: true
+
+service:
+  type: ClusterIP
+
+serviceMonitor:
+  enabled: true
+  interval: 30s

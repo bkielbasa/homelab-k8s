@@ -1,0 +1,30 @@
+image:
+  tag: "2.0.2"
+volume:
+  storageClassName: nfs-client
+
+serviceMonitor:
+  enabled: true
+
+extenralDatabase:
+  host: mariadb.mariadb.svc.cluster.local
+  port: 3306
+  database: uptime_kuma
+  username: uptime_kuma
+  password: "change-me-user-password"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: uptime.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - uptime.klimczak.xyz
+      secretName: uptime-tls

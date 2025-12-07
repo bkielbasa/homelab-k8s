@@ -17,3 +17,19 @@ resource "ovh_domain_zone_record" "vault" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "uptime-kuma" {
+  zone      = "klimczak.xyz"
+  subdomain = "uptime"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
+
+resource "ovh_domain_zone_record" "blob-storage" {
+  zone      = "klimczak.xyz"
+  subdomain = "bs"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}

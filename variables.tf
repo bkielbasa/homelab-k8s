@@ -22,3 +22,8 @@ variable public_ip {
   type = string
   default = "212.87.243.126"
 }
+
+variable vault_token {
+  type = string
+  sensitive = true
+}

@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: auto-discovery
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchExpressions:
+      - key: prometheus.io/scrape
+        operator: In
+        values:
+          - "true"
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+

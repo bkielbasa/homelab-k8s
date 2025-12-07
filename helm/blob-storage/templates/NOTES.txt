@@ -1,0 +1,99 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+=======================================================
+   DISTRIBUTED BLOB STORAGE SYSTEM DEPLOYED
+=======================================================
+
+{{- if .Values.master.enabled }}
+
+Master Server:
+  Service: {{ include "blob-storage.master.serviceName" . }}
+  Port: {{ .Values.master.service.port }}
+
+  Get master server status:
+    kubectl get pods -l "app.kubernetes.io/component=master,app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- end }}
+
+{{- if .Values.chunkserver.enabled }}
+
+Chunk Servers:
+  Service: {{ include "blob-storage.chunkserver.serviceName" . }} (headless)
+  Port: {{ .Values.chunkserver.service.port }}
+  Replicas: {{ .Values.chunkserver.replicaCount }}
+
+  Get chunk server status:
+    kubectl get pods -l "app.kubernetes.io/component=chunkserver,app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- end }}
+
+{{- if .Values.client.enabled }}
+
+Client API:
+  Service: {{ include "blob-storage.client.serviceName" . }}
+  Port: {{ .Values.client.service.port }}
+
+  Get client API status:
+    kubectl get pods -l "app.kubernetes.io/component=client,app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- end }}
+
+{{- if .Values.frontend.enabled }}
+
+Frontend Web UI:
+  Service: {{ include "blob-storage.frontend.serviceName" . }}
+  Port: {{ .Values.frontend.service.port }}
+  Type: {{ .Values.frontend.service.type }}
+
+{{- if eq .Values.frontend.service.type "LoadBalancer" }}
+
+  Get the application URL:
+    NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+
+    export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "blob-storage.frontend.serviceName" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+    echo "Frontend URL: http://$SERVICE_IP:{{ .Values.frontend.service.port }}"
+
+{{- else if eq .Values.frontend.service.type "NodePort" }}
+
+  Get the application URL:
+    export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "blob-storage.frontend.serviceName" . }})
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    echo "Frontend URL: http://$NODE_IP:$NODE_PORT"
+
+{{- else if eq .Values.frontend.service.type "ClusterIP" }}
+
+  Get the application URL by port-forwarding:
+    kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "blob-storage.frontend.serviceName" . }} {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }}
+    echo "Frontend URL: http://127.0.0.1:{{ .Values.frontend.service.port }}"
+
+{{- end }}
+
+  Get frontend status:
+    kubectl get pods -l "app.kubernetes.io/component=frontend,app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- end }}
+
+=======================================================
+
+Common Commands:
+
+  View all resources:
+    kubectl get all -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+  View logs:
+    kubectl logs -l "app.kubernetes.io/instance={{ .Release.Name }}" --all-containers=true
+
+  Scale chunk servers:
+    kubectl scale statefulset {{ include "blob-storage.fullname" . }}-chunkserver --replicas=<desired-count>
+
+  Check persistent volumes:
+    kubectl get pvc -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+=======================================================

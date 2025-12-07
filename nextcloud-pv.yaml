@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-data-pv
+spec:
+  capacity:
+    storage: 400Gi
+  accessModes:
+    - ReadWriteOnce  # Local storage typically only supports RWO
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path-mini
+  local:
+    path: /mnt/nextcloud-data  # Path on your node
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - "192168129"

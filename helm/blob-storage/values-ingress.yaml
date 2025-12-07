@@ -1,0 +1,75 @@
+# Example values for blob-storage with Ingress configuration
+# This is useful for production deployments with a proper domain name
+
+frontend:
+  # Change service type to ClusterIP when using Ingress
+  service:
+    type: ClusterIP
+    port: 9400
+
+  # Enable and configure Ingress
+  ingress:
+    enabled: true
+    className: "nginx"  # Use your ingress controller class
+    annotations:
+      # NGINX Ingress Controller annotations
+      nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+
+      # Uncomment for SSL/TLS with cert-manager
+      # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+      # Uncomment for rate limiting
+      # nginx.ingress.kubernetes.io/limit-rps: "10"
+
+    hosts:
+      - host: blob-storage.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+    # Uncomment to enable TLS/SSL
+    # tls:
+    #   - secretName: blob-storage-tls
+    #     hosts:
+    #       - blob-storage.example.com
+
+# Increase resources for production
+master:
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+chunkserver:
+  replicaCount: 3
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+client:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+frontend:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi

@@ -1,0 +1,8 @@
+config:
+  nextcloud:
+    server: https://klimczak.xyz
+    auth:
+      username: "exporter"
+      password: "zp37Ms#8WdNX3k2SebBvfE"
+      type: "basic"
+

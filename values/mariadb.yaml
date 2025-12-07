@@ -1,0 +1,30 @@
+image:
+  registry: docker.io
+  repository: bitnami/mariadb
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+auth:
+  rootPassword: "change-me-root-password"
+  database: "uptime_kuma"
+  username: "uptime_kuma"
+  password: "change-me-user-password"
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: "nfs-client"
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 256Mi
+      cpu: 100m
+
+metrics:
+  enabled: true
