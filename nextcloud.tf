@@ -15,17 +15,6 @@ resource "helm_release" "nextcloud" {
   ]
 }
 
-resource "helm_release" "nextcloud-exporter" {
-  name             = "nextcloud-exporter"
-  namespace        = kubernetes_namespace.nextcloud.metadata[0].name
-  repository = "https://charts.christianhuth.de"
-  chart      = "nextcloud-exporter"
-
-  values = [
-    file("values/nextcloud-exporter.yaml")
-  ]
-}
-
 resource "kubernetes_namespace" "nextcloud" {
   metadata {
     name = "nextcloud"
