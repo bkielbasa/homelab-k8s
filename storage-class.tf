@@ -1,6 +1,9 @@
 resource "kubernetes_storage_class_v1" "qnap_nfs" {
   metadata {
     name = "qnap-nfs"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
   }
 
   storage_provisioner    = "nfs.csi.k8s.io"
