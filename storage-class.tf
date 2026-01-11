@@ -1,3 +1,8 @@
+# helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+# helm repo update
+# helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+#  --namespace kube-system \
+#  --set kubeletDir=/var/lib/kubelet
 resource "kubernetes_storage_class_v1" "qnap_nfs" {
   metadata {
     name = "qnap-nfs"
