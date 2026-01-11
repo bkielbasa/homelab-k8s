@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
 # helm repo update
 # helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
@@ -9,6 +10,11 @@ resource "kubernetes_storage_class_v1" "qnap_nfs" {
     annotations = {
       "storageclass.kubernetes.io/is-default-class" = "true"
     }
+=======
+resource "kubernetes_storage_class_v1" "qnap_nfs" {
+  metadata {
+    name = "qnap-nfs"
+>>>>>>> 2dfea70 (add qnap nfs storage class)
   }
 
   storage_provisioner    = "nfs.csi.k8s.io"
