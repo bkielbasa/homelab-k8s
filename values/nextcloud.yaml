@@ -34,8 +34,7 @@ nextcloud:
         'memcache.distributed' => '\OC\Memcache\Redis',
         'memcache.locking' => '\OC\Memcache\Redis',
         'default_phone_region' => 'PL',
-        'log_type' => 'errorlog',
-        'loglevel' => 2,
+        'loglevel' => 0,
       );
   extraEnv:
   - name: NEXTCLOUD_SECRET

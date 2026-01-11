@@ -2,6 +2,11 @@ auth:
   enabled: false
 
 primary:
+  containerSecurityContext:
+    # Zwiększ limit file descriptorów
+    capabilities:
+      add:
+        - SYS_RESOURCE
   persistence:
     enabled: true
     storageClass: nfs-client
@@ -10,3 +15,8 @@ replica:
   persistence:
     enabled: true
     storageClass: nfs-client
+
+master:
+  extraEnvVars:
+    - name: VALKEY_MAXCLIENTS
+      value: "10000"
