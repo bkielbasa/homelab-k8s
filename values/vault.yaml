@@ -3,6 +3,26 @@ metrics:
 
 server:
   affinity: ""
+  livenessProbe:
+    enabled: true
+    execCommand:
+      - /bin/sh
+      - -ec
+      - vault status -tls-skip-verify
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 6
+  readinessProbe:
+    enabled: true
+    execCommand:
+      - /bin/sh
+      - -ec
+      - vault status -tls-skip-verify
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 3
   ha:
     enabled: true
     replicas: 2
