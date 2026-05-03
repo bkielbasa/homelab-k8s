@@ -66,3 +66,13 @@ data "kubernetes_secret" "vault_token" {
     namespace = "vault"
   }
 }
+
+data "vault_kv_secret_v2" "authentik_app" {
+  mount = "secret"
+  name  = "authentik/app"
+}
+
+provider "authentik" {
+  url   = "https://authentik.klimczak.xyz"
+  token = data.vault_kv_secret_v2.authentik_app.data["bootstrap_token"]
+}

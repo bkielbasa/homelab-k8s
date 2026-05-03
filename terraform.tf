@@ -23,6 +23,11 @@ terraform {
       source = "ovh/ovh"
       version = "2.7.0"
     }
+
+    authentik = {
+      source  = "goauthentik/authentik"
+      version = "~> 2026.2"
+    }
   }
 
   # S3 backend configuration for state storage
