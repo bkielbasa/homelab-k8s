@@ -1,9 +1,12 @@
 replicaCount: 1
 
 image:
-  repository: postgres
+  # pgvector/pgvector is a drop-in for stock postgres of the same major
+  # version; PVC layout is identical. Adds the `vector` extension which
+  # darek's memory schema needs.
+  repository: pgvector/pgvector
   pullPolicy: IfNotPresent
-  tag: "15.5"
+  tag: "pg15"
 
 service:
   type: ClusterIP
