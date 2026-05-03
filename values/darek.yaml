@@ -1,0 +1,93 @@
+image:
+  repository: bartlomiejklimczak/darek
+  pullPolicy: IfNotPresent
+  tag: "v0.1.0"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: darek.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - darek.klimczak.xyz
+      secretName: darek-tls
+
+dailyDigest:
+  enabled: true
+  schedule: "0 7 * * *"
+  timeZone: "Europe/Warsaw"
+
+# Production darek config. Mirrors local ~/.darek/config.yaml shape.
+# Calendars / mail accounts / digest target are committed (no secrets).
+config: |
+  openai:
+    model: gpt-4.1
+    api_key_env: DAREK_OPENAI_API_KEY
+
+  postgres:
+    url_env: DAREK_POSTGRES_URL
+
+  otel:
+    service_name: darek
+    exporter_endpoint: alloy.alloy.svc.cluster.local:4317
+    insecure: true
+
+  agent:
+    max_iterations: 10
+    llm_timeout: 60s
+    tool_timeout: 30s
+
+  memory:
+    pgvector: false
+    embedding_model: text-embedding-3-small
+
+  server:
+    bind: "0.0.0.0:7777"
+
+  todoist:
+    token_env: DAREK_TODOIST_TOKEN
+
+  freshrss:
+    base_url: https://rss.klimczak.xyz
+    username: bklimczak
+    password_env: DAREK_FRESHRSS_PASSWORD
+
+  calendars:
+    - kind: ical
+      nickname: Bartek (todoist)
+      url: https://ext.todoist.com/export/ical/todoist?user_id=10111671&ical_token=cac9b07209e9b82c51c12f8b2507ef90ccd905dfdc51e7153b55364b0833d760&r_factor=9254
+
+  mail:
+    attachments_dir: /home/nonroot/.darek/data/attachments
+    attachment_ttl_days: 30
+    accounts:
+      - nickname: personal
+        email: darek@klimczak.xyz
+        imap: { host: mail.klimczak.xyz, port: 993, tls: true }
+        smtp: { host: mail.klimczak.xyz, port: 465, tls: true }
+        username: darek@klimczak.xyz
+        secret_env: DAREK_MAIL_PERSONAL
+        sync_folders: [INBOX]
+
+  calendar_digest:
+    to: bartek@klimczak.xyz
+    from_account: personal
+
+# Secrets — placeholders. Apply real values via a separate apply
+# (kubectl create secret) or render this file from Vault before terraform run.
+# The committed file ships with empty strings so plain-text secrets never hit git.
+secrets:
+  DAREK_OPENAI_API_KEY: ""
+  DAREK_POSTGRES_URL: "postgres://darek:CHANGE_ME@postgresql.postgresql.svc.cluster.local:5432/darek?sslmode=disable"
+  DAREK_TODOIST_TOKEN: ""
+  DAREK_FRESHRSS_PASSWORD: ""
+  DAREK_GCAL_CLIENT_ID: ""
+  DAREK_GCAL_CLIENT_SECRET: ""
+  DAREK_MAIL_PERSONAL: ""

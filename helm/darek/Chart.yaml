@@ -1,0 +1,6 @@
+apiVersion: v2
+name: darek
+description: Personal-assistant CLI + web UI (Go). Talks to OpenAI, integrates Calendar/Todoist/FreshRSS/IMAP+SMTP.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

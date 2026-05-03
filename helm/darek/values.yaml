@@ -1,0 +1,114 @@
+replicaCount: 1
+
+image:
+  repository: bartlomiejklimczak/darek
+  pullPolicy: IfNotPresent
+  tag: "v0.1.0"
+
+service:
+  type: ClusterIP
+  port: 7777
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: darek.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - darek.klimczak.xyz
+      secretName: darek-tls
+
+# Persistent volume for ~/.darek/oauth (Google Calendar refresh tokens) and
+# ~/.darek/attachments (mail body cache). Mounted RWO; both serve and the
+# daily-digest CronJob reference the same claim — single-node k3s, brief
+# CronJob runtime, no contention in practice.
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+# Daily calendar digest cron. Schedule is in the CronJob's TZ field below.
+dailyDigest:
+  enabled: true
+  schedule: "0 7 * * *"
+  timeZone: "Europe/Warsaw"
+
+# DB migrations are run as a Helm pre-install/pre-upgrade Job.
+migrations:
+  enabled: true
+
+# Inline darek config.yaml. Rendered into a ConfigMap. Env vars referenced
+# by `*_env` keys come from the Secret below.
+config: |
+  openai:
+    model: gpt-4.1
+    api_key_env: DAREK_OPENAI_API_KEY
+
+  postgres:
+    url_env: DAREK_POSTGRES_URL
+
+  otel:
+    service_name: darek
+    exporter_endpoint: alloy.alloy.svc.cluster.local:4317
+    insecure: true
+
+  agent:
+    max_iterations: 10
+    llm_timeout: 60s
+    tool_timeout: 30s
+
+  memory:
+    pgvector: false
+    embedding_model: text-embedding-3-small
+
+  server:
+    bind: "0.0.0.0:7777"
+
+# Secret values. Keys become env vars in the pod via envFrom.
+# Treat this section as gitignored — fill in via values/darek.yaml override
+# (which is committed but contains placeholders) or apply secret manually.
+secrets:
+  DAREK_OPENAI_API_KEY: ""
+  DAREK_POSTGRES_URL: ""
+  DAREK_TODOIST_TOKEN: ""
+  DAREK_FRESHRSS_PASSWORD: ""
+  DAREK_GCAL_CLIENT_ID: ""
+  DAREK_GCAL_CLIENT_SECRET: ""
+  DAREK_MAIL_PERSONAL: ""
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 20
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+imagePullSecrets: []

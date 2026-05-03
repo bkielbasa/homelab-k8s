@@ -1,0 +1,13 @@
+darek deployed.
+
+Web UI:
+  https://{{ (index .Values.ingress.hosts 0).host }}
+
+Run an ad-hoc digest:
+  kubectl -n {{ .Release.Namespace }} create job --from=cronjob/{{ include "darek.fullname" . }}-daily-digest darek-digest-$(date +%s)
+
+Mint a Google Calendar OAuth token (interactive):
+  kubectl -n {{ .Release.Namespace }} exec -it deploy/{{ include "darek.fullname" . }} -- /usr/local/bin/darek calendar refresh-token <nickname>
+
+Tail logs:
+  kubectl -n {{ .Release.Namespace }} logs -f deploy/{{ include "darek.fullname" . }}
