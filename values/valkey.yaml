@@ -2,6 +2,8 @@ auth:
   enabled: false
 
 primary:
+  podAnnotations:
+    linkerd.io/inject: disabled
   containerSecurityContext:
     # Zwiększ limit file descriptorów
     capabilities:
@@ -12,6 +14,8 @@ primary:
     storageClass: nfs-client
 
 replica:
+  podAnnotations:
+    linkerd.io/inject: disabled
   persistence:
     enabled: true
     storageClass: nfs-client

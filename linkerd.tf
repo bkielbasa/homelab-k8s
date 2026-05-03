@@ -60,6 +60,7 @@ resource "helm_release" "linkerd_control_plane" {
   chart      = "linkerd-control-plane"
   namespace  = "linkerd"
 
+  timeout    = 600
   depends_on = [helm_release.linkerd_crds]
 
   values = [

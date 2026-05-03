@@ -6,6 +6,8 @@ resource "helm_release" "valkey" {
   create_namespace = true
   version = "5.0.1"
 
+  timeout = 600
+
   values = [
     file("values/valkey.yaml")
   ]

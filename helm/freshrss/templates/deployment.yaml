@@ -67,6 +67,10 @@ spec:
               value: "kubernetes.default.svc"
             - name: KUBERNETES_SERVICE_PORT
               value: "443"
+            - name: CRON_MIN
+              value: "13,43"
+            - name: TZ
+              value: "Europe/Warsaw"
       {{- if .Values.persistence.enabled }}
       volumes:
         - name: freshrss-data

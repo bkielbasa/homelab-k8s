@@ -5,23 +5,17 @@ server:
   affinity: ""
   livenessProbe:
     enabled: true
-    execCommand:
-      - /bin/sh
-      - -ec
-      - vault status -tls-skip-verify
+    path: "/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"
     initialDelaySeconds: 60
-    periodSeconds: 10
-    timeoutSeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 5
     failureThreshold: 6
   readinessProbe:
     enabled: true
-    execCommand:
-      - /bin/sh
-      - -ec
-      - vault status -tls-skip-verify
+    path: "/v1/sys/health?standbyok=true"
     initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 10
+    periodSeconds: 15
+    timeoutSeconds: 5
     failureThreshold: 3
   ha:
     enabled: true
