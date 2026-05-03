@@ -16,7 +16,7 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
   hosts:
     - host: darek.klimczak.xyz
       paths:
@@ -88,8 +88,15 @@ config: |
     to: bartek@klimczak.xyz
     from_account: personal
 
+  auth:
+    username_env: DAREK_AUTH_USERNAME
+    password_hash_env: DAREK_AUTH_PASSWORD_HASH
+    session_key_env: DAREK_SESSION_KEY
+    session_ttl: 720h
+
 # Secrets are loaded from Vault path `secret/data/darek` by external-secrets;
 # see darek-vault.tf. Each Vault field becomes an env var with the same name
 # (so populate `darek` in Vault with: DAREK_OPENAI_API_KEY, DAREK_POSTGRES_URL,
 # DAREK_TODOIST_TOKEN, DAREK_FRESHRSS_PASSWORD, DAREK_GCAL_CLIENT_ID,
-# DAREK_GCAL_CLIENT_SECRET, DAREK_MAIL_PERSONAL).
+# DAREK_GCAL_CLIENT_SECRET, DAREK_MAIL_PERSONAL,
+# DAREK_AUTH_USERNAME, DAREK_AUTH_PASSWORD_HASH, DAREK_SESSION_KEY).
