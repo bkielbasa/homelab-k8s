@@ -56,3 +56,47 @@ resource "authentik_application" "vault" {
   protocol_provider = authentik_provider_oauth2.vault.id
   meta_launch_url   = "https://vault.klimczak.xyz"
 }
+
+# Full-access policy for human Vault admins authenticated via Authentik.
+resource "vault_policy" "vault_admin" {
+  name = "vault-admin"
+
+  policy = <<EOT
+path "*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+EOT
+}
+
+# OIDC auth method backed by Authentik.
+resource "vault_jwt_auth_backend" "oidc" {
+  type               = "oidc"
+  path               = "oidc"
+  oidc_discovery_url = "https://authentik.klimczak.xyz/application/o/vault/"
+  oidc_client_id     = authentik_provider_oauth2.vault.client_id
+  oidc_client_secret = authentik_provider_oauth2.vault.client_secret
+  default_role       = "default"
+}
+
+# Default role: gates access to vault-admins group, grants vault-admin policy.
+resource "vault_jwt_auth_backend_role" "default" {
+  backend         = vault_jwt_auth_backend.oidc.path
+  role_name       = "default"
+  role_type       = "oidc"
+  user_claim      = "sub"
+  groups_claim    = "groups"
+  bound_audiences = [authentik_provider_oauth2.vault.client_id]
+
+  bound_claims = {
+    groups = authentik_group.vault_admins.name
+  }
+
+  allowed_redirect_uris = [
+    "https://vault.klimczak.xyz/ui/vault/auth/oidc/oidc/callback",
+    "http://localhost:8250/oidc/callback",
+  ]
+
+  token_policies = [vault_policy.vault_admin.name]
+  token_ttl      = 3600
+  token_max_ttl  = 28800
+}

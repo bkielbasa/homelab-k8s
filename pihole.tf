@@ -48,3 +48,7 @@ resource "pihole_dns_record" "darek" {
   ip     = "192.168.1.30"
 }
 
+resource "pihole_dns_record" "authentik" {
+  domain = "authentik.klimczak.xyz"
+  ip     = "192.168.1.30"
+}
