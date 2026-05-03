@@ -1,3 +1,11 @@
+serviceAccount:
+  create: false
+  name: "darek-sa"
+
+# Secret <fullname>-env is created by external-secrets from Vault path `darek`.
+envSecret:
+  create: false
+
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
@@ -80,14 +88,8 @@ config: |
     to: bartek@klimczak.xyz
     from_account: personal
 
-# Secrets — placeholders. Apply real values via a separate apply
-# (kubectl create secret) or render this file from Vault before terraform run.
-# The committed file ships with empty strings so plain-text secrets never hit git.
-secrets:
-  DAREK_OPENAI_API_KEY: ""
-  DAREK_POSTGRES_URL: "postgres://darek:CHANGE_ME@postgresql.postgresql.svc.cluster.local:5432/darek?sslmode=disable"
-  DAREK_TODOIST_TOKEN: ""
-  DAREK_FRESHRSS_PASSWORD: ""
-  DAREK_GCAL_CLIENT_ID: ""
-  DAREK_GCAL_CLIENT_SECRET: ""
-  DAREK_MAIL_PERSONAL: ""
+# Secrets are loaded from Vault path `secret/data/darek` by external-secrets;
+# see darek-vault.tf. Each Vault field becomes an env var with the same name
+# (so populate `darek` in Vault with: DAREK_OPENAI_API_KEY, DAREK_POSTGRES_URL,
+# DAREK_TODOIST_TOKEN, DAREK_FRESHRSS_PASSWORD, DAREK_GCAL_CLIENT_ID,
+# DAREK_GCAL_CLIENT_SECRET, DAREK_MAIL_PERSONAL).

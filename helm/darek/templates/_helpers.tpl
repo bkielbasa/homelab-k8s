@@ -49,8 +49,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-ServiceAccount name.
+ServiceAccount name. When .Values.serviceAccount.create is false, use the
+externally-supplied name (typically created by terraform for Vault auth).
 */}}
 {{- define "darek.serviceAccountName" -}}
-{{- printf "%s-sa" (include "darek.fullname" .) }}
+{{- if .Values.serviceAccount.create }}
+{{- default (printf "%s-sa" (include "darek.fullname" .)) .Values.serviceAccount.name }}
+{{- else }}
+{{- required "serviceAccount.name is required when serviceAccount.create is false" .Values.serviceAccount.name }}
+{{- end }}
 {{- end }}
