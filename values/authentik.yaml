@@ -1,0 +1,47 @@
+authentik:
+  postgresql:
+    host: postgresql.postgresql.svc.cluster.local
+    name: authentik
+    user: authentik
+
+server:
+  replicas: 1
+  envFrom:
+    - secretRef:
+        name: authentik-app
+  env:
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-postgres
+          key: password
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - authentik.klimczak.xyz
+    tls:
+      - hosts:
+          - authentik.klimczak.xyz
+        secretName: authentik-tls
+
+worker:
+  replicas: 1
+  envFrom:
+    - secretRef:
+        name: authentik-app
+  env:
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-postgres
+          key: password
+
+serviceAccount:
+  create: false
+
+postgresql:
+  enabled: false
