@@ -41,3 +41,11 @@ resource "ovh_domain_zone_record" "darek" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "authentik" {
+  zone      = "klimczak.xyz"
+  subdomain = "authentik"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
