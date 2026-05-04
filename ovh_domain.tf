@@ -49,3 +49,11 @@ resource "ovh_domain_zone_record" "authentik" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "headlamp" {
+  zone      = "klimczak.xyz"
+  subdomain = "headlamp"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}

@@ -1,0 +1,43 @@
+config:
+  inCluster: true
+  baseURL: ""
+  oidc:
+    secret:
+      create: false
+    clientID: "headlamp"
+    # clientSecret injected via set_sensitive from helm_release
+    issuerURL: "https://authentik.klimczak.xyz/application/o/headlamp/"
+    scopes: "openid profile email groups"
+    callbackURL: "https://headlamp.klimczak.xyz/oidc-callback"
+
+serviceAccount:
+  create: true
+  name: "headlamp"
+
+clusterRoleBinding:
+  create: true
+  clusterRoleName: cluster-admin
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: headlamp.klimczak.xyz
+      paths:
+        - path: /
+          type: Prefix
+  tls:
+    - hosts:
+        - headlamp.klimczak.xyz
+      secretName: headlamp-tls
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
