@@ -8,6 +8,13 @@ resource "helm_release" "prometheus" {
   values = [
     file("values/prometheus.yaml")
   ]
+
+  set_sensitive = [
+    {
+      name  = "grafana.env.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET"
+      value = authentik_provider_oauth2.grafana.client_secret
+    },
+  ]
 }
 
 resource "helm_release" "loki" {

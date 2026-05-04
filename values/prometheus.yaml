@@ -5,7 +5,7 @@ grafana:
     ingressClassName: "nginx"
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
     hosts:
       - grafana.klimczak.xyz
     path: /
@@ -15,12 +15,34 @@ grafana:
         hosts:
           - grafana.klimczak.xyz
   
+  grafana.ini:
+    server:
+      root_url: https://grafana.klimczak.xyz
+    auth.generic_oauth:
+      enabled: true
+      name: Authentik
+      icon: signin
+      allow_sign_up: true
+      client_id: grafana
+      # client_secret comes from env GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+      # (injected via helm_release set_sensitive in monitoring.tf)
+      scopes: openid profile email groups
+      auth_url: https://authentik.klimczak.xyz/application/o/authorize/
+      token_url: https://authentik.klimczak.xyz/application/o/token/
+      api_url: https://authentik.klimczak.xyz/application/o/userinfo/
+      # Only members of grafana-admins may authenticate. Without group membership,
+      # Grafana rejects the login. The role_attribute_path then maps admins to
+      # GrafanaAdmin; the Viewer fallback never fires because allowed_groups gates
+      # entry, but role_attribute_path requires a non-empty result.
+      allowed_groups: grafana-admins
+      role_attribute_path: contains(groups[*], 'grafana-admins') && 'GrafanaAdmin' || 'Viewer'
+
   sidecar:
     datasources:
       defaultDatasourceEnabled: false
       alertmanager:
         enabled: false
-  
+
   datasources:
     datasources.yaml:
       apiVersion: 1
