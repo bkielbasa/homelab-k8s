@@ -35,6 +35,7 @@ grafana:
       # GrafanaAdmin; the Viewer fallback never fires because allowed_groups gates
       # entry, but role_attribute_path requires a non-empty result.
       allowed_groups: grafana-admins
+      groups_attribute_path: groups
       role_attribute_path: contains(groups[*], 'grafana-admins') && 'GrafanaAdmin' || 'Viewer'
 
   sidecar:
