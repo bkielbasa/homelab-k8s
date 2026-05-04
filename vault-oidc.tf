@@ -29,6 +29,21 @@ data "authentik_property_mapping_provider_scope" "scopes" {
   ]
 }
 
+# Custom scope mapping that emits group memberships in the OIDC token.
+# Required because the default profile scope uses request.user.groups.all()
+# (Django's generic relation) which may not resolve Authentik groups correctly;
+# ak_groups is the canonical accessor. Vault needs the "groups" claim to map
+# vault-admins → vault-admin policy.
+resource "authentik_property_mapping_provider_scope" "groups" {
+  name       = "OAuth2 groups"
+  scope_name = "groups"
+  expression = <<-EOT
+    return {
+      "groups": [group.name for group in request.user.ak_groups.all()],
+    }
+  EOT
+}
+
 resource "authentik_provider_oauth2" "vault" {
   name               = "vault"
   client_id          = "vault"
@@ -47,7 +62,10 @@ resource "authentik_provider_oauth2" "vault" {
     },
   ]
 
-  property_mappings = data.authentik_property_mapping_provider_scope.scopes.ids
+  property_mappings = concat(
+    data.authentik_property_mapping_provider_scope.scopes.ids,
+    [authentik_property_mapping_provider_scope.groups.id],
+  )
 }
 
 resource "authentik_application" "vault" {
