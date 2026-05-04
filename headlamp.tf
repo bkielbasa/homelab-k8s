@@ -25,3 +25,45 @@ resource "helm_release" "headlamp" {
     file("values/headlamp.yaml")
   ]
 }
+
+# Routes /outpost.goauthentik.io/* on headlamp.klimczak.xyz directly to the
+# Authentik server pod so the protected host can serve start/callback/sign-out
+# pages. Required because Authentik's outpost only recognizes a flow when the
+# Host header matches the ProxyProvider's external_host (headlamp.klimczak.xyz).
+resource "kubernetes_ingress_v1" "headlamp_outpost" {
+  metadata {
+    name      = "headlamp-outpost"
+    namespace = "authentik"
+    annotations = {
+      "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+      "cert-manager.io/cluster-issuer"           = "letsencrypt-prod-dns"
+    }
+  }
+
+  spec {
+    ingress_class_name = "nginx"
+
+    rule {
+      host = "headlamp.klimczak.xyz"
+      http {
+        path {
+          path      = "/outpost.goauthentik.io"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "authentik-server"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+
+    tls {
+      hosts       = ["headlamp.klimczak.xyz"]
+      secret_name = "headlamp-tls"
+    }
+  }
+}
