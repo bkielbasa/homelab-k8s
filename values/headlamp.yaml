@@ -1,11 +1,6 @@
 config:
   inCluster: true
   baseURL: ""
-  # Bypass Headlamp's own token-login UI — the ingress already gates access
-  # via Authentik forward-auth, and the pod's SA has cluster-admin via the
-  # chart's ClusterRoleBinding.
-  extraArgs:
-    - "-skip-login"
 
 serviceAccount:
   create: true
