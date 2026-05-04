@@ -17,6 +17,11 @@ spec:
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
+          annotations:
+            # Linkerd sidecar never exits, blocks the Pod from reaching
+            # Completed state and the Job is marked Failed. Cron-style work
+            # gets no mesh — east-west traffic from this pod is direct.
+            linkerd.io/inject: disabled
           labels:
             {{- include "darek.selectorLabels" . | nindent 12 }}
             job: daily-digest
