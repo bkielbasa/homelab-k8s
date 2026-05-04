@@ -20,12 +20,15 @@ data "authentik_flow" "default_invalidation_flow" {
   slug = "default-provider-invalidation-flow"
 }
 
-# Built-in scope mappings for openid / profile / email.
+# Built-in scope mappings for openid / profile / email / offline_access.
+# offline_access is required so providers that need refresh tokens (Headlamp) can
+# get them; harmless for providers that don't request it.
 data "authentik_property_mapping_provider_scope" "scopes" {
   managed_list = [
     "goauthentik.io/providers/oauth2/scope-openid",
     "goauthentik.io/providers/oauth2/scope-profile",
     "goauthentik.io/providers/oauth2/scope-email",
+    "goauthentik.io/providers/oauth2/scope-offline_access",
   ]
 }
 

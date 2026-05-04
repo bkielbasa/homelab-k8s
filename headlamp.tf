@@ -17,18 +17,11 @@ resource "helm_release" "headlamp" {
   timeout = 600
 
   depends_on = [
-    kubernetes_namespace.headlamp,
-    authentik_provider_oauth2.headlamp,
+    authentik_application.headlamp,
+    authentik_outpost_provider_attachment.headlamp,
   ]
 
   values = [
     file("values/headlamp.yaml")
-  ]
-
-  set_sensitive = [
-    {
-      name  = "config.oidc.clientSecret"
-      value = authentik_provider_oauth2.headlamp.client_secret
-    },
   ]
 }
