@@ -8,25 +8,4 @@
 '7': o
 '8': �
 image:
-  tag: 26.3.0
-
-persistence:
-  enabled: true
-  size: 2Gi
-  storageClass: "local-path"
-
-ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-  hosts:
-    - host: budget.klimczak.xyz
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: actualbudget-tls
-      hosts:
-        - budget.klimczak.xyz
+  tag: 26.5.0
