@@ -104,6 +104,7 @@ resource "vault_jwt_auth_backend_role" "default" {
   user_claim      = "sub"
   groups_claim    = "groups"
   bound_audiences = [authentik_provider_oauth2.vault.client_id]
+  oidc_scopes     = ["openid", "profile", "email", "groups"]
 
   bound_claims = {
     groups = authentik_group.vault_admins.name
