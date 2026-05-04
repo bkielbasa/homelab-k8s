@@ -35,6 +35,9 @@ nextcloud:
         'memcache.locking' => '\OC\Memcache\Redis',
         'default_phone_region' => 'PL',
         'loglevel' => 0,
+        // user_oidc reaches Authentik via the cluster's internal LB IP
+        // (192.168.1.30, RFC1918). NC blocks "local remote servers" by default.
+        'allow_local_remote_servers' => true,
       );
   extraEnv:
   - name: NEXTCLOUD_SECRET
