@@ -3,7 +3,8 @@ config:
   baseURL: ""
   oidc:
     secret:
-      create: false
+      create: true
+      name: headlamp-oidc
     clientID: "headlamp"
     # clientSecret injected via set_sensitive from helm_release
     issuerURL: "https://authentik.klimczak.xyz/application/o/headlamp/"
