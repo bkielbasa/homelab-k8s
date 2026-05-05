@@ -12,6 +12,10 @@ spec:
       - http01:
           ingress:
             class: nginx
+            podTemplate:
+              metadata:
+                annotations:
+                  linkerd.io/inject: disabled
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -27,4 +31,8 @@ spec:
       - http01:
           ingress:
             class: nginx
+            podTemplate:
+              metadata:
+                annotations:
+                  linkerd.io/inject: disabled
 

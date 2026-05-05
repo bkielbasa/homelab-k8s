@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.1"
+  tag: "v0.1.4"
 
 ingress:
   enabled: true
@@ -35,6 +35,9 @@ dailyDigest:
 # Production darek config. Mirrors local ~/.darek/config.yaml shape.
 # Calendars / mail accounts / digest target are committed (no secrets).
 config: |
+  whatsapp:
+    enabled: true
+
   openai:
     model: gpt-4.1
     api_key_env: DAREK_OPENAI_API_KEY
