@@ -1,6 +1,22 @@
 config:
   inCluster: true
   baseURL: ""
+  # OIDC: tokens issued by the Authentik "kubernetes" provider are accepted by
+  # kube-apiserver (configured with --oidc-issuer-url etc). User signs in via
+  # Authentik, Headlamp gets an id_token, uses it as the bearer to k8s API.
+  # No more manual SA-token paste — kube-apiserver authorizes via the
+  # ClusterRoleBinding mapping oidc:kubernetes-admins -> cluster-admin.
+  oidc:
+    secret:
+      create: true
+      name: headlamp-k8s-oidc
+    clientID: "kubernetes"
+    # clientSecret injected via helm_release set_sensitive
+    issuerURL: "https://authentik.klimczak.xyz/application/o/kubernetes/"
+    scopes: "openid profile email groups offline_access"
+    callbackURL: "https://headlamp.klimczak.xyz/oidc-callback"
+    validatorClientID: "kubernetes"
+    validatorIssuerURL: "https://authentik.klimczak.xyz/application/o/kubernetes/"
 
 serviceAccount:
   create: true

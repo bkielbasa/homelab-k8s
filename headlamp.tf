@@ -19,10 +19,18 @@ resource "helm_release" "headlamp" {
   depends_on = [
     authentik_application.headlamp,
     authentik_outpost_provider_attachment.headlamp,
+    authentik_provider_oauth2.kubernetes,
   ]
 
   values = [
     file("values/headlamp.yaml")
+  ]
+
+  set_sensitive = [
+    {
+      name  = "config.oidc.clientSecret"
+      value = authentik_provider_oauth2.kubernetes.client_secret
+    },
   ]
 }
 
