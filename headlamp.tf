@@ -12,7 +12,7 @@ resource "helm_release" "headlamp" {
   namespace  = kubernetes_namespace.headlamp.metadata[0].name
   repository = "https://kubernetes-sigs.github.io/headlamp/"
   chart      = "headlamp"
-  version    = "0.39.0"
+  version    = "0.41.0"
 
   timeout = 600
 
