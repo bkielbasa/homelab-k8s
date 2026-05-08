@@ -10,6 +10,13 @@ podSecurityContext:
   supplementalGroups:
     - 993   # host render group GID on the laptop node (verified via kubectl debug)
 
+securityContext:
+  privileged: true   # required for /dev/dri ioctl access on this kernel/cgroup config;
+                     # without it libva fails with "No VA display found" even with the
+                     # render group + hostPath mount. Acceptable for a single-tenant
+                     # homelab transcoder. The min-privilege alternative is the Intel
+                     # device plugin, which we can adopt later if needed.
+
 volumes:
   - name: dri
     hostPath:
