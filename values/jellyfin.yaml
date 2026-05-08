@@ -23,9 +23,7 @@ volumeMounts:
 persistence:
   config:
     enabled: true
-    accessMode: ReadWriteOnce
-    size: 10Gi
-    storageClass: nfs-client
+    existingClaim: jellyfin-config-qnap
   media:
     enabled: true
     type: pvc
