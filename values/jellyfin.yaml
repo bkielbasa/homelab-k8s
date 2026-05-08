@@ -6,7 +6,7 @@ image:
 nodeSelector:
   kubernetes.io/hostname: "laptop"
 
-securityContext:
+podSecurityContext:
   supplementalGroups:
     - 993   # host render group GID on the laptop node (verified via kubectl debug)
 
