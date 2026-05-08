@@ -57,3 +57,11 @@ resource "ovh_domain_zone_record" "headlamp" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "jellyfin" {
+  zone      = "klimczak.xyz"
+  subdomain = "media"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
