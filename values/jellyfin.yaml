@@ -1,0 +1,68 @@
+image:
+  repository: docker.io/jellyfin/jellyfin
+  pullPolicy: IfNotPresent
+  # tag intentionally empty — chart uses appVersion (10.11.8)
+
+nodeSelector:
+  kubernetes.io/hostname: "laptop"
+
+securityContext:
+  supplementalGroups:
+    - 993   # host render group GID on the laptop node (verified via kubectl debug)
+
+volumes:
+  - name: dri
+    hostPath:
+      path: /dev/dri
+      type: Directory
+
+volumeMounts:
+  - name: dri
+    mountPath: /dev/dri
+
+persistence:
+  config:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: nfs-client
+  media:
+    enabled: true
+    type: pvc
+    existingClaim: jellyfin-media
+  cache:
+    enabled: false   # use the pod's emptyDir at /cache (chart default when disabled)
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 4000m
+    memory: 4Gi
+
+startupProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  failureThreshold: 60   # 10m max startup; first DB scan can be slow
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: media.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - media.klimczak.xyz
+      secretName: media-tls
