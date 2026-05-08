@@ -4,6 +4,13 @@ resource "authentik_group" "jellyfin_users" {
   name = "jellyfin-users"
 }
 
+# Authentik group whose members get Jellyfin admin role.
+# Wired via the SSO-Auth plugin's "Admin Roles" setting (= "jellyfin-admins"),
+# which inspects the OIDC token's groups claim on each login.
+resource "authentik_group" "jellyfin_admins" {
+  name = "jellyfin-admins"
+}
+
 resource "authentik_provider_oauth2" "jellyfin" {
   name               = "jellyfin"
   client_id          = "jellyfin"
