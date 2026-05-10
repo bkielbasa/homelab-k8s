@@ -53,6 +53,23 @@ startupProbe:
   periodSeconds: 10
   failureThreshold: 60   # 10m max startup; first DB scan can be slow
 
+# Library scans block /health long enough to fail the chart's default
+# 1s-timeout probe, which restarts the pod mid-scan and corrupts library state.
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 5
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 3
+
 ingress:
   enabled: true
   className: nginx
