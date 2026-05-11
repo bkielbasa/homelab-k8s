@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.4"
+  tag: "v0.1.11"
 
 ingress:
   enabled: true
@@ -37,6 +37,7 @@ dailyDigest:
 config: |
   whatsapp:
     enabled: true
+    store_path: /home/nonroot/.darek/data/whatsapp/store.db
 
   openai:
     model: gpt-4.1
