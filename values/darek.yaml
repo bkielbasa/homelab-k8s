@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.12"
+  tag: "v0.1.16"
 
 ingress:
   enabled: true
@@ -35,6 +35,9 @@ dailyDigest:
 # Production darek config. Mirrors local ~/.darek/config.yaml shape.
 # Calendars / mail accounts / digest target are committed (no secrets).
 config: |
+  execution_history:
+    enabled: true
+
   whatsapp:
     enabled: true
     store_path: /home/nonroot/.darek/data/whatsapp/store.db
