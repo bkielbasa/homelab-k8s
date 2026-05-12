@@ -18,14 +18,6 @@ resource "ovh_domain_zone_record" "vault" {
   target    = var.public_ip
 }
 
-resource "ovh_domain_zone_record" "blob-storage" {
-  zone      = "klimczak.xyz"
-  subdomain = "bs"
-  fieldtype = "A"
-  ttl       = 3600
-  target    = var.public_ip
-}
-
 resource "ovh_domain_zone_record" "audiobookshelf" {
   zone      = "klimczak.xyz"
   subdomain = "audio"

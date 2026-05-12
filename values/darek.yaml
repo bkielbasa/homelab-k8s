@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.11"
+  tag: "v0.1.12"
 
 ingress:
   enabled: true
@@ -74,7 +74,7 @@ config: |
   calendars:
     - kind: ical
       nickname: Bartek (todoist)
-      url: https://ext.todoist.com/export/ical/todoist?user_id=10111671&ical_token=cac9b07209e9b82c51c12f8b2507ef90ccd905dfdc51e7153b55364b0833d760&r_factor=9254
+      url_env: DAREK_TODOIST_CAL_URL
 
   mail:
     attachments_dir: /home/nonroot/.darek/data/attachments
