@@ -1,2 +1,18 @@
 image:
-    tag: 26.5.2
+  tag: 26.5.2
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+  hosts:
+    - host: budget.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - budget.klimczak.xyz
+      secretName: actualbudget-tls
