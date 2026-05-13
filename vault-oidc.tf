@@ -76,6 +76,7 @@ resource "authentik_application" "vault" {
   slug              = "vault"
   protocol_provider = authentik_provider_oauth2.vault.id
   meta_launch_url   = "https://vault.klimczak.xyz/ui/vault/auth?with=oidc&role=default"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/vault.png"
 }
 
 # Full-access policy for human Vault admins authenticated via Authentik.

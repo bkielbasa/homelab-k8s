@@ -36,6 +36,7 @@ resource "authentik_application" "jellyfin" {
   slug              = "jellyfin"
   protocol_provider = authentik_provider_oauth2.jellyfin.id
   meta_launch_url   = "https://media.klimczak.xyz/sso/OID/start/authentik"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/jellyfin.png"
 }
 
 # Sensitive output — used once when configuring the SSO plugin in Jellyfin's

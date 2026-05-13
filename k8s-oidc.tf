@@ -41,6 +41,7 @@ resource "authentik_application" "kubernetes" {
   slug              = "kubernetes"
   protocol_provider = authentik_provider_oauth2.kubernetes.id
   meta_launch_url   = "https://headlamp.klimczak.xyz"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/kubernetes.png"
 }
 
 resource "authentik_policy_binding" "kubernetes_admins_required" {

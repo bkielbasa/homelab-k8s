@@ -29,4 +29,5 @@ resource "authentik_application" "actualbudget" {
   slug              = "actualbudget"
   protocol_provider = authentik_provider_oauth2.actualbudget.id
   meta_launch_url   = "https://budget.klimczak.xyz/"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/actual-budget.png"
 }

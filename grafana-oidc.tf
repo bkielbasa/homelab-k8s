@@ -29,4 +29,5 @@ resource "authentik_application" "grafana" {
   slug              = "grafana"
   protocol_provider = authentik_provider_oauth2.grafana.id
   meta_launch_url   = "https://grafana.klimczak.xyz/login/generic_oauth"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/grafana.png"
 }

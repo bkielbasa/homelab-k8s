@@ -33,4 +33,5 @@ resource "authentik_application" "nextcloud" {
   slug              = "nextcloud"
   protocol_provider = authentik_provider_oauth2.nextcloud.id
   meta_launch_url   = "https://klimczak.xyz/apps/user_oidc/login/1"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/nextcloud.png"
 }

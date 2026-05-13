@@ -29,4 +29,5 @@ resource "authentik_application" "freshrss" {
   slug              = "freshrss"
   protocol_provider = authentik_provider_oauth2.freshrss.id
   meta_launch_url   = "https://rss.klimczak.xyz/"
+  meta_icon         = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@main/png/freshrss.png"
 }
