@@ -4,6 +4,21 @@ persistence:
     - ReadWriteOnce
   size: 5Gi
 
+# SSO via Authentik. clientSecret is injected at apply time via
+# helm_release.set_sensitive in actualbudget.tf (sourced from
+# authentik_provider_oauth2.actualbudget.client_secret).
+# enforce=false keeps password login as a fallback in case OIDC breaks.
+login:
+  method: openid
+  allowedLoginMethods:
+    - password
+    - openid
+  openid:
+    enforce: false
+    providerName: "Authentik"
+    discoveryUrl: "https://authentik.klimczak.xyz/application/o/actualbudget/.well-known/openid-configuration"
+    clientId: "actualbudget"
+
 ingress:
   enabled: true
   className: nginx

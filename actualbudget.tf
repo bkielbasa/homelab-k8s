@@ -21,4 +21,11 @@ resource "helm_release" "actualbudget" {
     file("values/actualbudget.yaml"),
     file("values/actualbudget-image.yaml"),
   ]
+
+  set_sensitive = [
+    {
+      name  = "login.openid.clientSecret"
+      value = authentik_provider_oauth2.actualbudget.client_secret
+    },
+  ]
 }
