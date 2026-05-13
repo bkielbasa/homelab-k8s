@@ -15,19 +15,33 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 
 ## Services
 
-| URL | Service |
-|---|---|
-| `klimczak.xyz` | Nextcloud |
-| `media.klimczak.xyz` | Jellyfin |
-| `audio.klimczak.xyz` | Audiobookshelf |
-| `budget.klimczak.xyz` | Actual Budget |
-| `rss.klimczak.xyz` | FreshRSS |
-| `pass.klimczak.xyz` | Vaultwarden |
-| `vault.klimczak.xyz` | Vault |
-| `authentik.klimczak.xyz` | Authentik |
-| `grafana.klimczak.xyz` | Grafana / Prometheus / Loki / Tempo / Alloy |
-| `headlamp.klimczak.xyz` | Headlamp (k8s UI) |
-| `darek.klimczak.xyz` | Darek (custom app) |
+**User-facing apps**
+
+- Nextcloud — `klimczak.xyz`
+- Jellyfin — `media.klimczak.xyz`
+- Audiobookshelf — `audio.klimczak.xyz`
+- Actual Budget — `budget.klimczak.xyz`
+- FreshRSS — `rss.klimczak.xyz`
+- Vaultwarden — `pass.klimczak.xyz`
+- Vault — `vault.klimczak.xyz`
+- Authentik (SSO) — `authentik.klimczak.xyz`
+- Grafana (with Prometheus, Loki, Tempo, Alloy) — `grafana.klimczak.xyz`
+- Headlamp (Kubernetes UI) — `headlamp.klimczak.xyz`
+- Darek (custom app) — `darek.klimczak.xyz`
+- Homepage (LAN-only dashboard) — `homepage.homelab`
+
+**Infrastructure**
+
+- nginx-ingress
+- cert-manager + cert-manager-webhook-ovh (DNS-01 via OVH)
+- MetalLB
+- Linkerd (service mesh)
+- External Secrets (Vault → k8s)
+- csi-driver-nfs (default StorageClass `qnap-nfs`)
+- PostgreSQL, MariaDB, Valkey
+- Kubernetes API OIDC (via Authentik)
+- pi-hole local DNS records (managed in `pihole.tf`)
+- OVH `klimczak.xyz` DNS zone records (managed in `ovh_domain.tf`)
 
 ## Operating
 
@@ -55,11 +69,3 @@ For ad-hoc `kubectl`:
 export KUBECONFIG=~/.kube/malinka-oidc
 kubectl get pods -A
 ```
-
-## Gotchas
-
-1. **Default kubectl context is the work cluster.** Set `KUBECONFIG=~/.kube/malinka-oidc` (or `~/.kube/malinka`) before running cluster commands — running them against the default `prod` context will hit the wrong cluster.
-2. **Authentik users must have an email.** Any user that authenticates into Grafana, Nextcloud, or Vault via OIDC needs the email field populated; otherwise Grafana falls back to a non-existent `/emails` endpoint and login fails.
-3. **Router port-forward must target `192.168.1.30`** (nginx-ingress), not `192.168.1.29` (pi-hole). If it hits pi-hole, external clients get pi-hole's self-signed cert.
-4. **`pihole.tf` is the source of truth for LAN DNS overrides.** Adding a new service requires both an OVH `A` record (in `ovh_domain.tf`) and a pi-hole record (in `pihole.tf`) — otherwise LAN clients resolve to the public IP and hairpin-NAT through the router.
-5. **`values/actualbudget-image.yaml`** is the only file the version-bump bot is allowed to touch. The rest of actualbudget's config lives in `values/actualbudget.yaml` so a bot bump can't strip ingress config.
