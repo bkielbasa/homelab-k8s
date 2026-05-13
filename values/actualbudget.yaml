@@ -1,3 +1,9 @@
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
 ingress:
   enabled: true
   className: nginx
