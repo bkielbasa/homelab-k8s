@@ -58,10 +58,6 @@ spec:
             - name: freshrss-data
               mountPath: /var/www/FreshRSS/data
           {{- end }}
-       
-          volumeMounts:
-            - name: freshrss-data
-              mountPath: /var/www/FreshRSS/data
           env:
             - name: KUBERNETES_SERVICE_HOST
               value: "kubernetes.default.svc"
@@ -71,6 +67,22 @@ spec:
               value: "13,43"
             - name: TZ
               value: "Europe/Warsaw"
+            {{- if .Values.oidc.enabled }}
+            - name: OIDC_ENABLED
+              value: "1"
+            - name: OIDC_PROVIDER_METADATA_URL
+              value: {{ .Values.oidc.providerMetadataUrl | quote }}
+            - name: OIDC_CLIENT_ID
+              value: {{ .Values.oidc.clientId | quote }}
+            - name: OIDC_CLIENT_SECRET
+              value: {{ .Values.oidc.clientSecret | quote }}
+            - name: OIDC_X_FORWARDED_HEADERS
+              value: "X-Forwarded-Proto X-Forwarded-Host X-Forwarded-Port"
+            - name: OIDC_REMOTE_USER_CLAIM
+              value: {{ .Values.oidc.remoteUserClaim | default "preferred_username" | quote }}
+            - name: OIDC_SCOPES
+              value: {{ .Values.oidc.scopes | default "openid profile email" | quote }}
+            {{- end }}
       {{- if .Values.persistence.enabled }}
       volumes:
         - name: freshrss-data

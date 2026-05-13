@@ -19,7 +19,6 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 
 - Nextcloud — `klimczak.xyz`
 - Jellyfin — `media.klimczak.xyz`
-- Audiobookshelf — `audio.klimczak.xyz`
 - Actual Budget — `budget.klimczak.xyz`
 - FreshRSS — `rss.klimczak.xyz`
 - Vaultwarden — `pass.klimczak.xyz`

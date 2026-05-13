@@ -28,11 +28,6 @@ resource "pihole_dns_record" "freshrss" {
   ip     = "192.168.1.30"
 }
 
-resource "pihole_dns_record" "audiobookshelf" {
-  domain = "audio.klimczak.xyz"
-  ip     = "192.168.1.30"
-}
-
 resource "pihole_dns_record" "klimczak" {
   domain = "klimczak.xyz"
   ip     = "192.168.1.30"

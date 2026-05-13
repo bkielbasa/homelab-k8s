@@ -7,4 +7,11 @@ resource "helm_release" "freshrss" {
   values = [
     file("values/freshrss.yaml")
   ]
+
+  set_sensitive = [
+    {
+      name  = "oidc.clientSecret"
+      value = authentik_provider_oauth2.freshrss.client_secret
+    },
+  ]
 }
