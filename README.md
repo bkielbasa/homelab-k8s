@@ -28,7 +28,6 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 - Grafana (with Prometheus, Loki, Tempo, Alloy) — `grafana.klimczak.xyz`
 - Headlamp (Kubernetes UI) — `headlamp.klimczak.xyz`
 - Darek (custom app) — `darek.klimczak.xyz`
-- Homepage (LAN-only dashboard) — `homepage.homelab`
 
 **Infrastructure**
 
