@@ -14,7 +14,7 @@ resource "authentik_provider_oauth2" "freshrss" {
   allowed_redirect_uris = [
     {
       matching_mode = "strict"
-      url           = "https://rss.klimczak.xyz/i/oidc/"
+      url           = "https://rss.klimczak.xyz:443/i/oidc/"
     },
   ]
 
