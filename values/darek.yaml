@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.19"
+  tag: "v0.1.20"
 
 ingress:
   enabled: true
@@ -96,8 +96,11 @@ config: |
     from_account: personal
 
   auth:
-    username_env: DAREK_AUTH_USERNAME
-    password_hash_env: DAREK_AUTH_PASSWORD_HASH
+    issuer: https://authentik.klimczak.xyz/application/o/darek/
+    client_id: darek
+    client_secret_env: DAREK_OIDC_CLIENT_SECRET
+    redirect_url: https://darek.klimczak.xyz/auth/callback
+    required_group: darek-users
     session_key_env: DAREK_SESSION_KEY
     session_ttl: 720h
 
@@ -106,4 +109,4 @@ config: |
 # (so populate `darek` in Vault with: DAREK_OPENAI_API_KEY, DAREK_POSTGRES_URL,
 # DAREK_TODOIST_TOKEN, DAREK_FRESHRSS_PASSWORD, DAREK_GCAL_CLIENT_ID,
 # DAREK_GCAL_CLIENT_SECRET, DAREK_MAIL_PERSONAL,
-# DAREK_AUTH_USERNAME, DAREK_AUTH_PASSWORD_HASH, DAREK_SESSION_KEY).
+# DAREK_OIDC_CLIENT_SECRET, DAREK_SESSION_KEY).
