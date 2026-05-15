@@ -210,17 +210,16 @@ dashboard:
   env:
     NETBIRD_MGMT_API_ENDPOINT: https://netbird.klimczak.xyz:443
     NETBIRD_MGMT_GRPC_API_ENDPOINT: https://netbird.klimczak.xyz:443
-    AUTH_CLIENT_SECRET:
     AUTH_AUTHORITY: https://authentik.klimczak.xyz/application/o/netbird/
     USE_AUTH0: false
     AUTH_SUPPORTED_SCOPES: openid profile email offline_access api groups
-    AUTH_REDIRECT_URI:
-    AUTH_SILENT_REDIRECT_URI:
     NETBIRD_TOKEN_SOURCE: accessToken
-    NGINX_SSL_PORT:
-    LETSENCRYPT_DOMAIN:
-    LETSENCRYPT_EMAIL:
 
   envFromSecret:
     AUTH_CLIENT_ID: netbird-idp/idpClientID
     AUTH_AUDIENCE: netbird-idp/idpClientID
+    # Authentik client_type=confidential requires the dashboard to send
+    # client_secret on PKCE token exchange. The secret ends up in
+    # browser-side JS so its confidentiality is weak by design — security
+    # still relies on the netbird-users group policy binding.
+    AUTH_CLIENT_SECRET: netbird-idp/idpClientSecret
