@@ -27,6 +27,7 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 - Grafana (with Prometheus, Loki, Tempo, Alloy) — `grafana.klimczak.xyz`
 - Headlamp (Kubernetes UI) — `headlamp.klimczak.xyz`
 - Darek (custom app) — `darek.klimczak.xyz`
+- NetBird (VPN) — `netbird.klimczak.xyz`
 
 **Infrastructure**
 
@@ -40,6 +41,7 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 - Kubernetes API OIDC (via Authentik)
 - pi-hole local DNS records (managed in `pihole.tf`)
 - OVH `klimczak.xyz` DNS zone records (managed in `ovh_domain.tf`)
+- NetBird routing peer (DaemonSet on `laptop`, advertises `192.168.1.0/24`)
 
 ## Operating
 
@@ -51,6 +53,13 @@ Terraform-managed Kubernetes homelab. Everything that can be codified is codifie
 - AWS creds for the S3 state backend (see `env.example`)
 - `VAULT_TOKEN` set for terraform to read secrets from Vault
 - OVH API credentials (`ovh_app_key`, `ovh_app_secret`, `ovh_consumer_key`) — in `terraform.tfvars` or env
+
+**Manual prerequisites (not Terraform-managed)**
+
+- PostgreSQL `netbird` database — created once via `./psql_create_db.sh netbird`. The generated DSN goes into Vault at `secret/netbird/datastore.postgresDSN`. The role's password must be URL-safe (hex chars only); the default script output contains `/` so re-roll with `openssl rand -hex 24` if needed.
+- Authentik service-account `netbird-idp` needs the built-in **`authentik Read-only`** role assigned via the UI (Directory → Users → netbird-idp → Roles tab). Plus membership in **`authentik Admins`** is set via Terraform — the role-only path didn't grant enough API permission scope.
+- NetBird routing-peer setup key is generated once in the NetBird dashboard and stored in Vault at `secret/netbird/router.setup_key`.
+- NetBird dashboard configuration (in the NetBird UI): one `Network Route` for `192.168.1.0/24` against the `homelab-router` peer, plus a `Nameserver Group` pushing `192.168.1.29` (pi-hole) for the `klimczak.xyz` match domain.
 
 **Day-to-day**
 
