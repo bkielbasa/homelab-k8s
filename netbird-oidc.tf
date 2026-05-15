@@ -20,7 +20,7 @@ resource "authentik_provider_oauth2" "netbird" {
   signing_key        = data.authentik_certificate_key_pair.default.id
 
   allowed_redirect_uris = [
-    # NetBird dashboard (hash-fragment SPA routes used by oidc-client-ts)
+    # NetBird dashboard (hash-fragment SPA routes used by oidc-client-ts).
     {
       matching_mode = "strict"
       url           = "https://netbird.klimczak.xyz/#callback"
@@ -29,14 +29,14 @@ resource "authentik_provider_oauth2" "netbird" {
       matching_mode = "strict"
       url           = "https://netbird.klimczak.xyz/#silent-callback"
     },
-    # NetBird CLI device-flow callback (random ephemeral port)
+    # NetBird CLI device-flow callback. Must be a literal URL — regex
+    # patterns with `[...]` (e.g. `localhost:[0-9]+`) crash Authentik's
+    # cors_allow() with `ValueError: Invalid IPv6 URL` (urlparse mis-reads
+    # the regex character class as an IPv6 literal), breaking the OIDC
+    # discovery endpoint for the entire provider.
     {
-      matching_mode = "regex"
-      url           = "http://localhost:[0-9]+"
-    },
-    {
-      matching_mode = "regex"
-      url           = "http://127.0.0.1:[0-9]+"
+      matching_mode = "strict"
+      url           = "http://localhost:53000"
     },
   ]
 
