@@ -49,3 +49,11 @@ resource "ovh_domain_zone_record" "jellyfin" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "netbird" {
+  zone      = "klimczak.xyz"
+  subdomain = "netbird"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}

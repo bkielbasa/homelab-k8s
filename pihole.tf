@@ -52,3 +52,8 @@ resource "pihole_dns_record" "jellyfin" {
   domain = "media.klimczak.xyz"
   ip     = "192.168.1.30"
 }
+
+resource "pihole_dns_record" "netbird" {
+  domain = "netbird.klimczak.xyz"
+  ip     = "192.168.1.30"
+}
