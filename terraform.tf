@@ -28,6 +28,11 @@ terraform {
       source  = "goauthentik/authentik"
       version = "~> 2026.2"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
   # S3 backend configuration for state storage

@@ -46,3 +46,25 @@ resource "authentik_policy_binding" "netbird_users_required" {
   group  = authentik_group.netbird_users.id
   order  = 0
 }
+
+# Service-account user the NetBird management server uses to sync users/groups
+# from Authentik via the IdP-manager (client_credentials + password grant).
+# Permissions (view_user/view_group) must be granted manually in the Authentik UI
+# — the Terraform provider doesn't expose them as of writing.
+resource "random_password" "netbird_idp" {
+  length  = 32
+  special = false
+}
+
+resource "authentik_user" "netbird_idp" {
+  username = "netbird-idp"
+  name     = "NetBird IdP Manager"
+  type     = "service_account"
+  path     = "service-accounts"
+  password = random_password.netbird_idp.result
+}
+
+output "netbird_idp_password" {
+  value     = random_password.netbird_idp.result
+  sensitive = true
+}
