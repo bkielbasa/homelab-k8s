@@ -62,3 +62,47 @@ resource "kubectl_manifest" "netbird_vault_secret_store" {
     vault_kubernetes_auth_backend_role.netbird,
   ]
 }
+
+locals {
+  netbird_external_secrets = {
+    "netbird-idp"       = "netbird/idp"
+    "netbird-datastore" = "netbird/datastore"
+    "netbird-relay"     = "netbird/relay"
+    "netbird-router"    = "netbird/router"
+  }
+}
+
+resource "kubectl_manifest" "netbird_external_secret" {
+  for_each = local.netbird_external_secrets
+
+  yaml_body = yamlencode({
+    apiVersion = "external-secrets.io/v1"
+    kind       = "ExternalSecret"
+    metadata = {
+      name      = each.key
+      namespace = kubernetes_namespace.netbird.metadata[0].name
+    }
+    spec = {
+      refreshInterval = "1h"
+      secretStoreRef = {
+        name = "vault-backend"
+        kind = "SecretStore"
+      }
+      target = {
+        name           = each.key
+        creationPolicy = "Owner"
+      }
+      dataFrom = [
+        {
+          extract = {
+            key = each.value
+          }
+        },
+      ]
+    }
+  })
+
+  depends_on = [
+    kubectl_manifest.netbird_vault_secret_store,
+  ]
+}
