@@ -61,7 +61,7 @@ management:
         "Provider": "hosted",
         "ProviderConfig": {
           "ClientID": "{{ .IDP_CLIENT_ID }}",
-          "ClientSecret": "",
+          "ClientSecret": "{{ .IDP_CLIENT_SECRET }}",
           "Domain": "authentik.klimczak.xyz",
           "Audience": "{{ .IDP_CLIENT_ID }}",
           "TokenEndpoint": "https://authentik.klimczak.xyz/application/o/token/",
@@ -75,7 +75,7 @@ management:
       "PKCEAuthorizationFlow": {
         "ProviderConfig": {
           "ClientID": "{{ .IDP_CLIENT_ID }}",
-          "ClientSecret": "",
+          "ClientSecret": "{{ .IDP_CLIENT_SECRET }}",
           "Domain": "",
           "Audience": "{{ .IDP_CLIENT_ID }}",
           "TokenEndpoint": "https://authentik.klimczak.xyz/application/o/token/",
@@ -140,6 +140,7 @@ management:
     DATASTORE_ENCRYPTION_KEY: netbird-datastore/datastoreEncryptionKey
     RELAY_PASSWORD: netbird-relay/relayPassword
     IDP_CLIENT_ID: netbird-idp/idpClientID
+    IDP_CLIENT_SECRET: netbird-idp/idpClientSecret
     IDP_SERVICE_ACCOUNT_USER: netbird-idp/idpServiceAccountUser
     IDP_SERVICE_ACCOUNT_PASSWORD: netbird-idp/idpServiceAccountPassword
 
