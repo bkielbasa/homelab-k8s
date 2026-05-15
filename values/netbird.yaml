@@ -45,7 +45,8 @@ management:
           "TokenEndpoint": "https://authentik.klimczak.xyz/application/o/token/",
           "ClientID": "{{ .IDP_CLIENT_ID }}",
           "ClientSecret": "",
-          "GrantType": "client_credentials"
+          "GrantType": "client_credentials",
+          "Scope": "goauthentik.io/api"
         },
         "ExtraConfig": {
           "Password": "{{ .IDP_SERVICE_ACCOUNT_PASSWORD }}",
