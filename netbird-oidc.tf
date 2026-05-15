@@ -13,17 +13,23 @@ resource "authentik_provider_oauth2" "netbird" {
   signing_key        = data.authentik_certificate_key_pair.default.id
 
   allowed_redirect_uris = [
+    # NetBird dashboard (hash-fragment SPA routes used by oidc-client-ts)
     {
       matching_mode = "strict"
-      url           = "https://netbird.klimczak.xyz/auth/callback"
+      url           = "https://netbird.klimczak.xyz/#callback"
     },
     {
       matching_mode = "strict"
-      url           = "https://netbird.klimczak.xyz/peers"
+      url           = "https://netbird.klimczak.xyz/#silent-callback"
+    },
+    # NetBird CLI device-flow callback (random ephemeral port)
+    {
+      matching_mode = "regex"
+      url           = "http://localhost:[0-9]+"
     },
     {
-      matching_mode = "strict"
-      url           = "http://localhost:53000"
+      matching_mode = "regex"
+      url           = "http://127.0.0.1:[0-9]+"
     },
   ]
 
