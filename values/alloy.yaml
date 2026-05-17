@@ -71,6 +71,23 @@ alloy:
         forward_to = [loki.write.loki.receiver]
 
         stage.cri {}
+
+        // Drop chatty/redundant labels so we stay under Loki's 15-label per-stream
+        // limit. These labels churn (versions, hashes) or duplicate other labels
+        // (heritage/chart/release) and add no query value.
+        stage.label_drop {
+          values = [
+            "app_kubernetes_io_version",
+            "app_kubernetes_io_managed_by",
+            "app_kubernetes_io_part_of",
+            "helm_sh_chart",
+            "chart",
+            "heritage",
+            "pod_template_hash",
+            "controller_revision_hash",
+            "release",
+          ]
+        }
       }
 
       // Write logs to Loki
@@ -113,12 +130,16 @@ alloy:
 
       // Export metrics to Prometheus
       otelcol.exporter.prometheus "default" {
+        // Copy OTel resource attributes (service.name, service.namespace, etc.)
+        // onto every metric as labels — so {service_name="darek"} matches the app's
+        // own metrics, not just kube-state-metrics' ingress info.
+        resource_to_telemetry_conversion = true
         forward_to = [prometheus.remote_write.prometheus.receiver]
       }
 
       prometheus.remote_write "prometheus" {
         endpoint {
-          url = "http://prometheus-server.monitoring.svc.cluster.local/api/v1/write"
+          url = "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
 
           // Add basic retry configuration
           queue_config {

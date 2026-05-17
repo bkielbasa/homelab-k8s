@@ -9,7 +9,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.21"
+  tag: "v0.1.22"
 
 ingress:
   enabled: true
@@ -51,7 +51,7 @@ config: |
 
   otel:
     service_name: darek
-    exporter_endpoint: alloy.alloy.svc.cluster.local:4317
+    exporter_endpoint: alloy.monitoring.svc.cluster.local:4317
     insecure: true
 
   agent:

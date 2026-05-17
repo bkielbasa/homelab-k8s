@@ -25,6 +25,13 @@ loki:
     reject_old_samples_max_age: 168h
     retention_period: 744h
 
+  # Match the "entry too far behind" cutoff to reject_old_samples_max_age.
+  # Loki rejects entries older than max_chunk_age/2, so a 2h default => 1h cutoff,
+  # which silently dropped backfill from Alloy restarts. 168h*2 keeps the two
+  # policies consistent.
+  ingester:
+    max_chunk_age: 336h
+
 deploymentMode: SingleBinary
 
 singleBinary:
