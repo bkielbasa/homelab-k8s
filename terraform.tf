@@ -33,6 +33,11 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 
   # S3 backend configuration for state storage
@@ -41,5 +46,6 @@ terraform {
     key            = "homelab-k8s/terraform.tfstate"
     region         = "eu-central-1"
     encrypt        = true
+    profile        = "homelab"
   }
 } 

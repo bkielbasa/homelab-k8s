@@ -19,6 +19,11 @@ provider "ovh" {
   consumer_key       = var.ovh_consumer_key
 }
 
+provider "aws" {
+  region  = "eu-central-1"
+  profile = "homelab"
+}
+
 data "ovh_me" "myaccount" {}
 
 data "ovh_order_cart" "mycart" {

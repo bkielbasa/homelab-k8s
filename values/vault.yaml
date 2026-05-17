@@ -3,6 +3,16 @@ metrics:
 
 server:
   affinity: ""
+  # AWS credentials for the awskms seal stanza. Bootstrap-stable secret
+  # managed by Terraform (vault-unseal.tf) — not sourced from Vault itself,
+  # since Vault is sealed when these are needed.
+  extraSecretEnvironmentVars:
+    - envName: AWS_ACCESS_KEY_ID
+      secretName: vault-unseal-aws
+      secretKey: AWS_ACCESS_KEY_ID
+    - envName: AWS_SECRET_ACCESS_KEY
+      secretName: vault-unseal-aws
+      secretKey: AWS_SECRET_ACCESS_KEY
   livenessProbe:
     enabled: true
     path: "/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"
@@ -35,7 +45,14 @@ server:
         storage "raft" {
           path = "/vault/data"
         }
-        
+
+        # AWS KMS auto-unseal. After the one-time seal migration, pods
+        # restart unattended — no Shamir keys needed for unsealing.
+        seal "awskms" {
+          region     = "eu-central-1"
+          kms_key_id = "alias/homelab-vault-unseal"
+        }
+
         service_registration "kubernetes" {}
   dataStorage:
     enabled: true
