@@ -9,6 +9,11 @@ resource "helm_release" "vault" {
   values = [
     file("values/vault.yaml")
   ]
+
+  # Pods reference vault-unseal-aws Secret via extraSecretEnvironmentVars.
+  # The Secret must exist before the StatefulSet rolls or the new pod fails
+  # to start.
+  depends_on = [kubernetes_secret.vault_unseal_aws]
 }
 
 resource "helm_release" "external-secrets" {
