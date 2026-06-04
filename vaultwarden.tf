@@ -3,7 +3,7 @@ resource "helm_release" "vaultwarden" {
   namespace        = "vaultwarden"
   chart            = "vaultwarden"
   repository       = "https://guerzon.github.io/vaultwarden"
-  version          = "0.34.3"
+  version          = "0.38.0"
   create_namespace = true
 
   values = [
