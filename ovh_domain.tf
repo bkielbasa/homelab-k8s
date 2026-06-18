@@ -57,3 +57,11 @@ resource "ovh_domain_zone_record" "netbird" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "sentinel" {
+  zone      = "klimczak.xyz"
+  subdomain = "sentinel"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}

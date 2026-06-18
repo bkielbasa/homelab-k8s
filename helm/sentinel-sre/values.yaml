@@ -1,0 +1,108 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/bkielbasa/sentinel-sre
+  pullPolicy: IfNotPresent
+  tag: "" # defaults to .Chart.AppVersion
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Claude credentials — the only secret not configured via the UI.
+# Set apiKey here (goes into a generated Secret), or point existingSecret at a
+# Secret that has an ANTHROPIC_API_KEY key.
+anthropic:
+  apiKey: ""
+  existingSecret: ""
+
+# Bundled Postgres. Set enabled: false to use an external database via the
+# `database` block instead.
+postgresql:
+  enabled: true
+  image: postgres:17
+  user: sentinel
+  password: sentinel
+  database: sentinel
+  storage: 5Gi
+  storageClassName: ""
+
+# External database (used when postgresql.enabled is false).
+# Provide url directly, or existingSecret with a DATABASE_URL key.
+database:
+  url: ""
+  existingSecret: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: sentinel.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: gateway
+      sectionName: http
+  hostnames:
+    - sentinel.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /incidents
+    port: http
+  initialDelaySeconds: 5
+readinessProbe:
+  httpGet:
+    path: /incidents
+    port: http
+  initialDelaySeconds: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+nodeSelector: {}
+tolerations: []
+affinity: {}

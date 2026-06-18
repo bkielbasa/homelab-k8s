@@ -1,0 +1,49 @@
+fullnameOverride: sentinel
+
+image:
+  repository: ghcr.io/bkielbasa/sentinel-sre
+  pullPolicy: IfNotPresent
+  tag: "0.0.1" # GitHub Actions publishes without a leading "v"
+
+# Private ghcr.io image. Pull secret is rendered from Vault by an ExternalSecret
+# (sentinel-vault.tf) into a dockerconfigjson Secret named sentinel-ghcr.
+imagePullSecrets:
+  - name: sentinel-ghcr
+
+# Reuse the ServiceAccount that sentinel-vault.tf creates (it's bound to the
+# Vault k8s-auth role used by the External Secrets SecretStore). Letting the
+# chart create its own would collide with the TF-managed one.
+serviceAccount:
+  create: false
+  name: sentinel
+
+# Anthropic API key + database DSN come from Vault via External Secrets
+# (see sentinel-vault.tf), which sync into the k8s Secrets referenced below.
+#   vault secret/sentinelsre/anthropic  (key ANTHROPIC_API_KEY) -> Secret sentinel-anthropic
+#   vault secret/sentinelsre/db         (key DATABASE_URL)       -> Secret sentinel-db
+anthropic:
+  existingSecret: sentinel-anthropic
+
+# Use the shared cluster Postgres (postgresql.postgresql.svc); the DSN in
+# Vault points at it. Bundled Postgres is disabled.
+postgresql:
+  enabled: false
+
+database:
+  existingSecret: sentinel-db
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+  hosts:
+    - host: sentinel.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - sentinel.klimczak.xyz
+      secretName: sentinel-tls
