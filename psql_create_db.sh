@@ -20,11 +20,11 @@ if [[ ! "$USER_NAME" =~ ^[a-z_][a-z0-9_]*$ ]]; then
   exit 1
 fi
 
-# strong random password
+# strong random password (alphanumeric only, so it's safe in DSN/URL strings)
 if command -v openssl >/dev/null 2>&1; then
-  PASSWORD="$(openssl rand -base64 48 | tr -d '\n' | head -c 48)"
+  PASSWORD="$(LC_ALL=C tr -dc 'A-Za-z0-9' < <(openssl rand -base64 96) | head -c 40)"
 else
-  PASSWORD="$(dd if=/dev/urandom bs=48 count=1 2>/dev/null | base64 | tr -d '\n' | head -c 48)"
+  PASSWORD="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 40)"
 fi
 
 # helper: run psql inside the pod (non-interactive)
@@ -64,13 +64,23 @@ psql_in_pod -d "$DB_NAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT AL
 psql_in_pod -d "$DB_NAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"$USER_NAME\""
 psql_in_pod -d "$DB_NAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO \"$USER_NAME\""
 
+HOST="postgresql.postgresql.svc.cluster.local"
+PORT="5432"
+
 echo
 echo "=== PostgreSQL user & database created/updated ==="
 echo "User:       $USER_NAME"
 echo "Database:   $DB_NAME"
 echo "Password:   $PASSWORD"
-echo "Host:       postgresql.postgresql.svc.cluster.local"
-echo "Port:       5432"
+echo "Host:       $HOST"
+echo "Port:       $PORT"
+
+echo
+echo "Go DSN (keyword/value, lib/pq & pgx):"
+echo "  host=$HOST port=$PORT user=$USER_NAME password=$PASSWORD dbname=$DB_NAME sslmode=disable"
+echo
+echo "Go DSN (URL):"
+echo "  postgres://$USER_NAME:$PASSWORD@$HOST:$PORT/$DB_NAME?sslmode=disable"
 
 echo
 echo "Store this password securely."
