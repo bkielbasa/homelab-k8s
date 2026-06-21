@@ -62,3 +62,8 @@ resource "pihole_dns_record" "sentinel" {
   domain = "sentinel.klimczak.xyz"
   ip     = "192.168.1.30"
 }
+
+resource "pihole_dns_record" "argocd" {
+  domain = "argo.klimczak.xyz"
+  ip     = "192.168.1.30"
+}
