@@ -65,3 +65,11 @@ resource "ovh_domain_zone_record" "sentinel" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "argocd" {
+  zone      = "klimczak.xyz"
+  subdomain = "argo"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
