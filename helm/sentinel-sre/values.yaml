@@ -16,6 +16,18 @@ anthropic:
   apiKey: ""
   existingSecret: ""
 
+# Encryption key for stored integration credentials (AES-256-GCM): a
+# base64-encoded 32-byte key or a 32-character string. Keep it stable — rotating
+# it makes existing encrypted credentials unreadable. Empty = stored unencrypted.
+secretKey: ""
+
+# Database migrations run as a pre-install/pre-upgrade Helm hook Job (the binary's
+# `migrate` command). The app also migrates on startup, so this is belt-and-braces;
+# disable if you run migrations out of band.
+migrations:
+  enabled: true
+  backoffLimit: 6
+
 # Bundled Postgres. Set enabled: false to use an external database via the
 # `database` block instead.
 postgresql:

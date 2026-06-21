@@ -59,6 +59,12 @@ spec:
                   name: {{ .Values.database.existingSecret | default (printf "%s-env" (include "sentinel-sre.fullname" .)) }}
                   key: DATABASE_URL
                   optional: true
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-env" (include "sentinel-sre.fullname" .) }}
+                  key: SECRET_KEY
+                  optional: true
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
