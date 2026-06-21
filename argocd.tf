@@ -27,4 +27,15 @@ resource "helm_release" "argocd" {
       value = authentik_provider_oauth2.argocd.client_secret
     },
   ]
+
+  # Pull the rest of the Argo CD stack into this resource's dependency closure so
+  # `terraform apply -target=helm_release.argocd` installs everything in one shot:
+  # both DNS records (public OVH + local Pi-hole) and the Authentik application +
+  # group + policy binding (the latter transitively covers the group and app).
+  depends_on = [
+    authentik_application.argocd,
+    authentik_policy_binding.argocd_admins_required,
+    ovh_domain_zone_record.argocd,
+    pihole_dns_record.argocd,
+  ]
 }
