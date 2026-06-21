@@ -1,0 +1,42 @@
+global:
+  domain: argo.klimczak.xyz
+
+configs:
+  cm:
+    url: https://argo.klimczak.xyz
+    # Local admin disabled — Authentik SSO is the only way in.
+    admin.enabled: false
+    oidc.config: |
+      name: Authentik
+      issuer: https://authentik.klimczak.xyz/application/o/argocd/
+      clientID: argocd
+      clientSecret: $oidc.argocd.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+        - groups
+
+  rbac:
+    # argocd-admins (Authentik group, via the groups claim) -> full admin.
+    policy.csv: |
+      g, argocd-admins, role:admin
+    # No access for anyone outside the mapped groups.
+    policy.default: ""
+    scopes: "[groups]"
+
+  params:
+    # nginx terminates TLS; argocd-server serves plain HTTP behind the ingress.
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: argo.klimczak.xyz
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Chart hardcodes the TLS secret name to argocd-server-tls; cert-manager
+    # populates it via the cluster-issuer annotation above.
+    tls: true
