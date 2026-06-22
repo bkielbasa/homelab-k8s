@@ -3,7 +3,7 @@ fullnameOverride: sentinel
 image:
   repository: ghcr.io/bkielbasa/sentinel-sre
   pullPolicy: IfNotPresent
-  tag: "0.0.2"
+  tag: "0.0.5"
 
 # Private ghcr.io image. Pull secret is rendered from Vault by an ExternalSecret
 # (sentinel-vault.tf) into a dockerconfigjson Secret named sentinel-ghcr.
