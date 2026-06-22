@@ -29,6 +29,29 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.persistence.enabled .Values.oidc.enabled }}
+      # Re-assert web-server (OIDC) auth on every start. The image only sets
+      # auth_type via FRESHRSS_INSTALL, which no-ops on an existing install, so a
+      # FreshRSS upgrade can silently reset auth_type to 'form' and break SSO
+      # (as happened 2026-04-20). This keeps http_auth pinned declaratively.
+      initContainers:
+        - name: ensure-http-auth
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command:
+            - sh
+            - -c
+            - |
+              cfg=/var/www/FreshRSS/data/config.php
+              if [ -f "$cfg" ]; then
+                sed -i "s/'auth_type' => 'form'/'auth_type' => 'http_auth'/" "$cfg"
+                echo "ensure-http-auth: auth_type pinned to http_auth"
+              else
+                echo "ensure-http-auth: no config.php yet (fresh install), skipping"
+              fi
+          volumeMounts:
+            - name: freshrss-data
+              mountPath: /var/www/FreshRSS/data
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
