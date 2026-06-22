@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: freshrss
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: freshrss
+  # Two sources: the chart, plus a ref to the same repo so the root-level
+  # values/ file can be referenced via $values (it lives outside the chart dir).
+  sources:
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      path: helm/freshrss
+      helm:
+        valueFiles:
+          - $values/values/freshrss.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  # Adoption verified clean, so Argo is given full control. Prune is safe: only
+  # chart-managed resources carry the app.kubernetes.io/instance=freshrss label.
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
