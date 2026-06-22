@@ -75,7 +75,10 @@ spec:
             - name: OIDC_CLIENT_ID
               value: {{ .Values.oidc.clientId | quote }}
             - name: OIDC_CLIENT_SECRET
-              value: {{ .Values.oidc.clientSecret | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.secretName | default "freshrss-oidc" | quote }}
+                  key: {{ .Values.oidc.secretKey | default "clientSecret" | quote }}
             - name: OIDC_X_FORWARDED_HEADERS
               value: "X-Forwarded-Proto X-Forwarded-Host X-Forwarded-Port"
             - name: OIDC_REMOTE_USER_CLAIM

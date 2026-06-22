@@ -3,13 +3,14 @@ image:
   pullPolicy: IfNotPresent
   tag: "1.27.1"
 
-# SSO via Authentik. clientSecret is injected at apply time via
-# helm_release.set_sensitive in freshrss.tf (sourced from
-# authentik_provider_oauth2.freshrss.client_secret).
+# SSO via Authentik. clientSecret is sourced from the freshrss-oidc Secret, which
+# External Secrets syncs from Vault (secret/freshrss/oidc). See freshrss-vault.tf.
 oidc:
   enabled: true
   providerMetadataUrl: "https://authentik.klimczak.xyz/application/o/freshrss/.well-known/openid-configuration"
   clientId: "freshrss"
+  secretName: freshrss-oidc
+  secretKey: clientSecret
   remoteUserClaim: "preferred_username"
   scopes: "openid profile email"
 
