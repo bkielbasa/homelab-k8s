@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: darek
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: darek
+  # Chart + root-level values/ via $values (values file lives outside the chart dir).
+  sources:
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      path: helm/darek
+      helm:
+        valueFiles:
+          - $values/values/darek.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  # Pilot-style adoption: manual sync only until verified, then prune/selfHeal enabled.
