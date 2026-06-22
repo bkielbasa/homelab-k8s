@@ -19,4 +19,9 @@ spec:
     - repoURL: https://github.com/bkielbasa/homelab-k8s
       targetRevision: master
       ref: values
-  # Pilot-style adoption: manual sync only until verified, then prune/selfHeal enabled.
+  # Adoption verified clean; prune-safe (TF-managed ESO/SecretStore carry no
+  # app.kubernetes.io/instance label). Argo now has full control.
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
