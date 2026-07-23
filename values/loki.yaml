@@ -39,7 +39,7 @@ singleBinary:
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: "nfs-client"
+    storageClass: "qnap-nfs"
   resources:
     requests:
       cpu: 50m

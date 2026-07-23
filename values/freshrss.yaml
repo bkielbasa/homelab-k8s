@@ -13,6 +13,7 @@ oidc:
   secretKey: clientSecret
   remoteUserClaim: "preferred_username"
   scopes: "openid profile email"
+  cryptoKey: "freshrss-oidc-crypto-key-change-me"
 
 ingress:
   enabled: true

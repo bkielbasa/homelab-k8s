@@ -22,6 +22,10 @@ persistence:
   accessMode: ReadWriteOnce
   size: 1Gi
 
+oidc:
+  enabled: false
+  cryptoKey: "freshrss-oidc-crypto-key-change-me"
+
 restartPolicy: Always
 
 livenessProbe:

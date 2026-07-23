@@ -13,7 +13,7 @@ auth:
 primary:
   persistence:
     enabled: true
-    storageClass: "nfs-client"
+    storageClass: "qnap-nfs"
     accessModes:
       - ReadWriteOnce
     size: 8Gi

@@ -108,6 +108,8 @@ spec:
               value: {{ .Values.oidc.remoteUserClaim | default "preferred_username" | quote }}
             - name: OIDC_SCOPES
               value: {{ .Values.oidc.scopes | default "openid profile email" | quote }}
+            - name: OIDC_CLIENT_CRYPTO_KEY
+              value: {{ .Values.oidc.cryptoKey | default "freshrss-oidc-crypto-key-change-me" | quote }}
             {{- end }}
       {{- if .Values.persistence.enabled }}
       volumes:

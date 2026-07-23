@@ -11,14 +11,14 @@ primary:
         - SYS_RESOURCE
   persistence:
     enabled: true
-    storageClass: nfs-client
+    storageClass: qnap-nfs
 
 replica:
   podAnnotations:
     linkerd.io/inject: disabled
   persistence:
     enabled: true
-    storageClass: nfs-client
+    storageClass: qnap-nfs
 
 master:
   extraEnvVars:
