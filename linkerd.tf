@@ -46,12 +46,17 @@ resource "tls_locally_signed_cert" "issuer_cert" {
   ]
 }
 
+resource "kubernetes_namespace" "linkerd" {
+  metadata {
+    name = "linkerd"
+  }
+}
+
 resource "helm_release" "linkerd_crds" {
-  name             = "linkerd-crds"
-  repository       = "https://helm.linkerd.io/stable"
-  chart            = "linkerd-crds"
-  namespace        = "linkerd"
-  create_namespace = true
+  name       = "linkerd-crds"
+  repository = "https://helm.linkerd.io/stable"
+  chart      = "linkerd-crds"
+  namespace  = kubernetes_namespace.linkerd.metadata[0].name
 }
 
 resource "helm_release" "linkerd_control_plane" {
@@ -78,12 +83,17 @@ resource "helm_release" "linkerd_control_plane" {
   ]
 }
 
+resource "kubernetes_namespace" "linkerd_viz" {
+  metadata {
+    name = "linkerd-viz"
+  }
+}
+
 resource "helm_release" "linkerd_viz" {
-  name             = "linkerd-viz"
-  repository       = "https://helm.linkerd.io/stable"
-  chart            = "linkerd-viz"
-  namespace        = "linkerd-viz"
-  create_namespace = true
+  name       = "linkerd-viz"
+  repository = "https://helm.linkerd.io/stable"
+  chart      = "linkerd-viz"
+  namespace  = kubernetes_namespace.linkerd_viz.metadata[0].name
 
   depends_on = [helm_release.linkerd_control_plane]
 

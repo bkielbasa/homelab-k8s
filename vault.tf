@@ -1,10 +1,15 @@
+resource "kubernetes_namespace" "vault" {
+  metadata {
+    name = "vault"
+  }
+}
+
 resource "helm_release" "vault" {
   name       = "vault"
-  namespace  = "vault"
+  namespace  = kubernetes_namespace.vault.metadata[0].name
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault"
   version    = "0.31.0"
-  create_namespace = true
 
   values = [
     file("values/vault.yaml")
@@ -16,13 +21,18 @@ resource "helm_release" "vault" {
   depends_on = [kubernetes_secret.vault_unseal_aws]
 }
 
+resource "kubernetes_namespace" "external_secrets" {
+  metadata {
+    name = "external-secrets-system"
+  }
+}
+
 resource "helm_release" "external-secrets" {
   name       = "external-secrets"
-  namespace  = "external-secrets-system"
+  namespace  = kubernetes_namespace.external_secrets.metadata[0].name
   repository = "https://charts.external-secrets.io"
   chart      = "external-secrets"
-  create_namespace = true
-  version = "0.20.3"
+  version    = "0.20.3"
 
   values = [
     yamlencode({

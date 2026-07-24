@@ -1,6 +1,11 @@
+resource "kubernetes_namespace" "postgresql" {
+  metadata {
+    name = "postgresql"
+  }
+}
+
 resource "helm_release" "postgresql" {
-  name             = "postgresql"
-  namespace        = "postgresql"
-  chart            = "./helm/postgresql"
-  create_namespace = true
-} 
+  name      = "postgresql"
+  namespace = kubernetes_namespace.postgresql.metadata[0].name
+  chart     = "./helm/postgresql"
+}
