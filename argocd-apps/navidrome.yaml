@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: navidrome
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: navidrome
+  sources:
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      path: helm/navidrome
+      helm:
+        valueFiles:
+          - $values/values/navidrome.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

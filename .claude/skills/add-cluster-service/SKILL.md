@@ -109,19 +109,34 @@ resource "helm_release" "<svc>" {
 Once a chart lives in this repo (`helm/<svc>`), register it with Argo instead of (or in
 addition to) the Terraform helm_release — but don't let both manage the same workload.
 
+Use multi-source with `$values` ref so the root-level `values/<svc>.yaml` can be
+referenced from outside the chart directory:
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
-metadata: { name: <svc>, namespace: argocd }
+metadata:
+  name: <svc>
+  namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/bkielbasa/homelab-k8s
-    path: helm/<svc>
-    targetRevision: master
-    helm: { valueFiles: [values.yaml] }
-  destination: { server: https://kubernetes.default.svc, namespace: <svc> }
-  syncPolicy: { automated: { prune: true, selfHeal: true } }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: <svc>
+  sources:
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      path: helm/<svc>
+      helm:
+        valueFiles:
+          - $values/values/<svc>.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
 ```
 
 ## Verify (after apply)

@@ -73,3 +73,11 @@ resource "ovh_domain_zone_record" "argocd" {
   ttl       = 3600
   target    = var.public_ip
 }
+
+resource "ovh_domain_zone_record" "navidrome" {
+  zone      = "klimczak.xyz"
+  subdomain = "audio"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}

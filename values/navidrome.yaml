@@ -1,0 +1,48 @@
+image:
+  repository: deluan/navidrome
+  pullPolicy: IfNotPresent
+  tag: "0.55.2"
+
+config:
+  ND_LOGLEVEL: info
+  ND_PORT: "4533"
+  ND_BASEURL: ""
+  ND_SESSIONTIMEOUT: "720h"
+  ND_ENABLETRANSCODINGCONFIG: "false"
+
+oidc:
+  enabled: true
+  providerMetadataUrl: "https://authentik.klimczak.xyz/application/o/navidrome/.well-known/openid-configuration"
+  clientId: "navidrome"
+  secretName: navidrome-oidc
+  secretKey: clientSecret
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+  hosts:
+    - host: audio.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - audio.klimczak.xyz
+      secretName: audio-tls
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  storageClass: qnap-nfs
+  size: 10Gi
+  musicSize: 50Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
