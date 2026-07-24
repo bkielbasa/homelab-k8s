@@ -23,7 +23,7 @@ spec:
               service:
                 name: {{ include "navidrome.fullname" $ }}
                 port:
-                  number: 80
+                  number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
   {{- if .Values.ingress.tls }}
