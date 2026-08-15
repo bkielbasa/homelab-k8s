@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: bartlomiejklimczak/workspace
+  tag: latest
+  pullPolicy: Always
+
+serviceAccount:
+  # false = use the externally-created SA that Vault auth binds to
+  create: false
+  name: "workspace"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: mail.klimczak.xyz
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+tls:
+  enabled: true
+  secretName: workspace-tls
+
+dkim:
+  enabled: false
+  secretName: workspace-dkim
+  domain: klimczak.xyz
+  selector: default
+
+databaseUrlSecret:
+  name: workspace-db
+  key: DATABASE_URL
+
+mailService:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    metallb.universe.tf/address-pool: nginx-ip-pool
+  ports:
+    smtp:
+      port: 25
+      targetPort: 2525
+    smtps:
+      port: 465
+      targetPort: 2465
+    imap:
+      port: 143
+      targetPort: 1143
+    imaps:
+      port: 993
+      targetPort: 1993
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+imagePullSecrets: []

@@ -76,3 +76,13 @@ For ad-hoc `kubectl`:
 export KUBECONFIG=~/.kube/malinka-oidc
 kubectl get pods -A
 ```
+
+### script
+
+Fix mp3 encoding
+
+~~~
+python3 scripts/fix-id3-encoding.py /mnt/navidromemusic/pvc-9079878d-97a3-4dbb-a615-468cda4157be/
+~~~
+
+

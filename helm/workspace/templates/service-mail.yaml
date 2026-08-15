@@ -1,0 +1,33 @@
+{{- if .Values.mailService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "workspace.fullname" . }}-mail
+  labels:
+    {{- include "workspace.labels" . | nindent 4 }}
+  {{- with .Values.mailService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.mailService.type }}
+  ports:
+    - name: smtp
+      port: {{ .Values.mailService.ports.smtp.port }}
+      targetPort: {{ .Values.mailService.ports.smtp.targetPort }}
+      protocol: TCP
+    - name: smtps
+      port: {{ .Values.mailService.ports.smtps.port }}
+      targetPort: {{ .Values.mailService.ports.smtps.targetPort }}
+      protocol: TCP
+    - name: imap
+      port: {{ .Values.mailService.ports.imap.port }}
+      targetPort: {{ .Values.mailService.ports.imap.targetPort }}
+      protocol: TCP
+    - name: imaps
+      port: {{ .Values.mailService.ports.imaps.port }}
+      targetPort: {{ .Values.mailService.ports.imaps.targetPort }}
+      protocol: TCP
+  selector:
+    {{- include "workspace.selectorLabels" . | nindent 4 }}
+{{- end }}

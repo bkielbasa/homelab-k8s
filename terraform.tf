@@ -2,51 +2,24 @@ terraform {
   required_version = ">= 1.0"
 
   required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.14"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-    }
-
     pihole = {
-      source = "ryanwholey/pihole"
+      source  = "ryanwholey/pihole"
       version = "2.0.0-beta.1"
     }
 
     ovh = {
-      source = "ovh/ovh"
+      source  = "ovh/ovh"
       version = "2.7.0"
     }
-
-    authentik = {
-      source  = "goauthentik/authentik"
-      version = "~> 2026.2"
-    }
-
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6"
-    }
-
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
   }
 
-  # S3 backend configuration for state storage
+  # Root state: apex DNS records and netbird pre-created records only.
   backend "s3" {
-    bucket         = "homelab-terr"
-    key            = "homelab-k8s/terraform.tfstate"
-    region         = "eu-central-1"
-    encrypt        = true
-    profile        = "homelab"
+    bucket       = "homelab-terr"
+    key          = "homelab-k8s/terraform.tfstate"
+    region       = "eu-central-1"
+    encrypt      = true
+    profile      = "homelab"
     use_lockfile = true
   }
-} 
+}

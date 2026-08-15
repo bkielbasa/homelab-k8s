@@ -1,0 +1,33 @@
+resource "kubernetes_namespace" "ingress_nginx" {
+  metadata {
+    name = "ingress-nginx"
+  }
+}
+
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  namespace  = kubernetes_namespace.ingress_nginx.metadata[0].name
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = "4.7.1"
+
+  values = [
+    yamlencode({
+      controller = {
+        service = {
+          type = "LoadBalancer"
+          annotations = {
+            "metallb.universe.tf/address-pool" = "nginx-ip-pool"
+          }
+        }
+        hostNetwork = true
+        config = {
+          "ssl-redirect"        = "true"
+          "ssl-protocols"       = "TLSv1.2 TLSv1.3"
+          "ssl-ciphers"         = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+          "client-max-body-size" = "500m"
+        }
+      }
+    })
+  ]
+}

@@ -1,0 +1,59 @@
+image:
+  repository: bartlomiejklimczak/workspace
+  tag: latest
+  pullPolicy: Always
+
+ingress:
+  enabled: true
+  className: nginx
+  host: mail.klimczak.xyz
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+tls:
+  enabled: true
+  # cert-manager issues this via the Ingress annotation above.
+  secretName: workspace-tls
+
+dkim:
+  enabled: false
+  secretName: workspace-dkim
+  domain: klimczak.xyz
+  selector: default
+
+# workspace-db Secret must exist in the workspace namespace before install.
+# Create it with:
+#   kubectl create secret generic workspace-db \
+#     --from-literal=DATABASE_URL='postgres://...' \
+#     -n workspace
+# Or manage via Vault + External Secrets (see terraform/services/workspace.tf).
+databaseUrlSecret:
+  name: workspace-db
+  key: DATABASE_URL
+
+mailService:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    metallb.universe.tf/address-pool: nginx-ip-pool
+  ports:
+    smtp:
+      port: 25
+      targetPort: 2525
+    smtps:
+      port: 465
+      targetPort: 2465
+    imap:
+      port: 143
+      targetPort: 1143
+    imaps:
+      port: 993
+      targetPort: 1993
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
