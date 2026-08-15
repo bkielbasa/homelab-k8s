@@ -30,6 +30,26 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.migrations.enabled }}
+      initContainers:
+        - name: migrate
+          image: "{{ .Values.migrations.image.repository }}:{{ .Values.migrations.image.tag }}"
+          args:
+            - -source=file:///migrations
+            - -database=$(DATABASE_URL)
+            - -verbose
+            - up
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.databaseUrlSecret.name }}
+                  key: {{ .Values.databaseUrlSecret.key }}
+          volumeMounts:
+            - name: migrations
+              mountPath: /migrations
+              readOnly: true
+      {{- end }}
       containers:
         - name: workspace
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -42,12 +62,30 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            - name: smtp
+              containerPort: {{ .Values.mailService.ports.smtp.targetPort }}
+              protocol: TCP
+            - name: smtps
+              containerPort: {{ .Values.mailService.ports.smtps.targetPort }}
+              protocol: TCP
+            - name: imap
+              containerPort: {{ .Values.mailService.ports.imap.targetPort }}
+              protocol: TCP
+            - name: imaps
+              containerPort: {{ .Values.mailService.ports.imaps.targetPort }}
+              protocol: TCP
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.databaseUrlSecret.name }}
                   key: {{ .Values.databaseUrlSecret.key }}
+            {{- if .Values.tls.enabled }}
+            - name: TLS_CERT_FILE
+              value: /certs/tls.crt
+            - name: TLS_KEY_FILE
+              value: /certs/tls.key
+            {{- end }}
             {{- if .Values.dkim.enabled }}
             - name: DKIM_DOMAIN
               value: {{ .Values.dkim.domain }}
@@ -59,10 +97,40 @@ spec:
                   name: {{ .Values.dkim.secretName }}
                   key: privateKey
             {{- end }}
+          volumeMounts:
+            {{- if .Values.migrations.enabled }}
+            - name: migrations
+              mountPath: /migrations
+              readOnly: true
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /certs
+              readOnly: true
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      volumes:
+        {{- if .Values.migrations.enabled }}
+        - name: migrations
+          configMap:
+            name: {{ include "workspace.fullname" . }}-migrations
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.tls.secretName }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

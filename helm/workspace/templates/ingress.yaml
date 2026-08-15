@@ -12,20 +12,24 @@ metadata:
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
-    - host: {{ .Values.ingress.host }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "workspace.fullname" . }}
+                name: {{ include "workspace.fullname" $ }}
                 port:
-                  number: {{ .Values.service.port }}
+                  name: http
+    {{- end }}
   {{- if .Values.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.ingress.host }}
+        {{- range .Values.ingress.hosts }}
+        - {{ . }}
+        {{- end }}
       secretName: {{ .Values.tls.secretName }}
   {{- end }}
 {{- end }}

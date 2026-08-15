@@ -6,15 +6,17 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: mail.klimczak.xyz
+  hosts:
+    - mail.klimczak.xyz
+    - klimczak.xyz
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 
 tls:
   enabled: true
-  # cert-manager issues this via the Ingress annotation above.
   secretName: workspace-tls
+  clusterIssuer: letsencrypt-prod-dns
 
 dkim:
   enabled: false

@@ -13,9 +13,24 @@ resource "ovh_domain_zone_record" "workspace" {
   target    = var.public_ip
 }
 
+# Public DNS — klimczak.xyz (apex)
+resource "ovh_domain_zone_record" "workspace_apex" {
+  zone      = "klimczak.xyz"
+  subdomain = ""
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
+
 # LAN DNS — Pi-hole
 resource "pihole_dns_record" "workspace" {
   domain = "mail.klimczak.xyz"
+  ip     = "192.168.1.30"
+}
+
+# LAN DNS — Pi-hole apex
+resource "pihole_dns_record" "workspace_apex" {
+  domain = "klimczak.xyz"
   ip     = "192.168.1.30"
 }
 

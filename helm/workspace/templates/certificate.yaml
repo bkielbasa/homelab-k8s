@@ -1,0 +1,17 @@
+{{- if .Values.tls.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "workspace.fullname" . }}-tls
+  labels:
+    {{- include "workspace.labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Values.tls.secretName }}
+  issuerRef:
+    name: {{ .Values.tls.clusterIssuer }}
+    kind: ClusterIssuer
+  dnsNames:
+    {{- range .Values.ingress.hosts }}
+    - {{ . }}
+    {{- end }}
+{{- end }}
