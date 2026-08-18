@@ -38,7 +38,8 @@ mailService:
   enabled: true
   type: LoadBalancer
   annotations:
-    metallb.universe.tf/address-pool: nginx-ip-pool
+    metallb.universe.tf/address-pool: mail-ip-pool
+    metallb.universe.tf/loadBalancerIPs: 192.168.1.31
   ports:
     smtp:
       port: 25
