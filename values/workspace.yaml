@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.1
+  tag: v0.0.2
   pullPolicy: Always
 
 ingress:
@@ -52,6 +52,20 @@ mailService:
     imaps:
       port: 993
       targetPort: 1993
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
 
 resources:
   requests:
