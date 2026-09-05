@@ -1,5 +1,11 @@
 replicaCount: 0
 
+persistence:
+  enabled: true
+  storageClass: "qnap-nfs"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
 serviceAccount:
   create: false
   name: "darek-sa"
