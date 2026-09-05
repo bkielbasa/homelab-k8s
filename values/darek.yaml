@@ -1,5 +1,11 @@
 replicaCount: 1
 
+# No service mesh for the serve pod: linkerd proxy-init cannot configure
+# iptables on the NixOS mini2 node (same reason the daily-digest CronJob is
+# excluded via linkerd.io/inject: disabled).
+podAnnotations:
+  linkerd.io/inject: disabled
+
 persistence:
   enabled: true
   storageClass: "qnap-nfs"
