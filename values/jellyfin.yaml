@@ -4,11 +4,11 @@ image:
   # tag intentionally empty — chart uses appVersion (10.11.8)
 
 nodeSelector:
-  kubernetes.io/hostname: "laptop"
+  kubernetes.io/hostname: "mini-pc"
 
 podSecurityContext:
   supplementalGroups:
-    - 993   # host render group GID on the laptop node (verified via kubectl debug)
+    - 990   # host /dev/dri group GID on the mini-pc node (renderD128)
 
 securityContext:
   privileged: true   # required for /dev/dri ioctl access on this kernel/cgroup config;

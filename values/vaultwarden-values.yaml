@@ -19,10 +19,10 @@ storage:
   data:
     name: "vaultwarden-data"
     size: "1Gi"
-    class: "local-path"
+    class: "qnap-nfs"
     accessMode: ReadWriteOnce
   attachments:
     name: "vaultwarden-attachements"
     size: "1Gi"
-    class: "local-path"
+    class: "qnap-nfs"
     accessMode: ReadWriteOnce

@@ -40,7 +40,7 @@ postgresql:
 # Persistent storage
 persistence:
   enabled: true
-  storageClass: "local-path"
+  storageClass: "qnap-nfs"
   accessMode: ReadWriteOnce
   size: 20Gi
   mountPath: "/var/lib/postgresql/data"
