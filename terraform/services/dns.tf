@@ -98,22 +98,6 @@ resource "pihole_dns_record" "freshrss" {
 }
 
 # ---------------------------------------------------------------------------
-# Sentinel (subdomain: sentinel)
-# ---------------------------------------------------------------------------
-resource "ovh_domain_zone_record" "sentinel" {
-  zone      = "klimczak.xyz"
-  subdomain = "sentinel"
-  fieldtype = "A"
-  ttl       = 3600
-  target    = var.public_ip
-}
-
-resource "pihole_dns_record" "sentinel" {
-  domain = "sentinel.klimczak.xyz"
-  ip     = "192.168.1.30"
-}
-
-# ---------------------------------------------------------------------------
 # Navidrome (subdomain: audio)
 # ---------------------------------------------------------------------------
 resource "ovh_domain_zone_record" "navidrome" {

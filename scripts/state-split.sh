@@ -195,16 +195,6 @@ SERVICES_RESOURCES=(
   "module.services.kubectl_manifest.freshrss_vault_secret_store"
   "module.services.kubectl_manifest.freshrss_oidc_external_secret"
   "module.services.pihole_dns_record.freshrss"
-  "module.services.kubernetes_namespace.sentinel"
-  "module.services.kubernetes_service_account.sentinel"
-  "module.services.vault_policy.sentinel"
-  "module.services.vault_kubernetes_auth_backend_role.sentinel"
-  "module.services.kubectl_manifest.sentinel_vault_secret_store"
-  "module.services.kubectl_manifest.sentinel_ghcr_external_secret"
-  'module.services.kubectl_manifest.sentinel_external_secret["sentinel-anthropic"]'
-  'module.services.kubectl_manifest.sentinel_external_secret["sentinel-db"]'
-  "module.services.ovh_domain_zone_record.sentinel"
-  "module.services.pihole_dns_record.sentinel"
   "module.services.kubernetes_namespace.navidrome"
   "module.services.ovh_domain_zone_record.navidrome"
   "module.services.pihole_dns_record.navidrome"

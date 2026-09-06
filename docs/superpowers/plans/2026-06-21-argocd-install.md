@@ -222,7 +222,7 @@ git commit -m "feat(argocd): deploy argo-cd Helm chart with Vault-sourced OIDC s
 ### Task 4: DNS record
 
 **Files:**
-- Modify: `ovh_domain.tf` (append a new record block after the `sentinel` record, lines ~61-67)
+- Modify: `ovh_domain.tf` (append a new record block at the end of the file)
 
 - [ ] **Step 1: Append the `argo` A-record to `ovh_domain.tf`**
 

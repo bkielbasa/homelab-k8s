@@ -154,16 +154,6 @@ tf kubectl_manifest.freshrss_vault_secret_store      module.services.kubectl_man
 tf kubectl_manifest.freshrss_oidc_external_secret    module.services.kubectl_manifest.freshrss_oidc_external_secret
 # Note: no ovh_domain_zone_record.freshrss exists in state
 tf pihole_dns_record.freshrss                        module.services.pihole_dns_record.freshrss
-tf kubernetes_namespace.sentinel                     module.services.kubernetes_namespace.sentinel
-tf kubernetes_service_account.sentinel               module.services.kubernetes_service_account.sentinel
-tf vault_policy.sentinel                             module.services.vault_policy.sentinel
-tf vault_kubernetes_auth_backend_role.sentinel        module.services.vault_kubernetes_auth_backend_role.sentinel
-tf kubectl_manifest.sentinel_vault_secret_store      module.services.kubectl_manifest.sentinel_vault_secret_store
-tf kubectl_manifest.sentinel_ghcr_external_secret    module.services.kubectl_manifest.sentinel_ghcr_external_secret
-tf 'kubectl_manifest.sentinel_external_secret["sentinel-anthropic"]' 'module.services.kubectl_manifest.sentinel_external_secret["sentinel-anthropic"]'
-tf 'kubectl_manifest.sentinel_external_secret["sentinel-db"]'        'module.services.kubectl_manifest.sentinel_external_secret["sentinel-db"]'
-tf ovh_domain_zone_record.sentinel                   module.services.ovh_domain_zone_record.sentinel
-tf pihole_dns_record.sentinel                        module.services.pihole_dns_record.sentinel
 tf kubernetes_namespace.navidrome                    module.services.kubernetes_namespace.navidrome
 tf ovh_domain_zone_record.navidrome                  module.services.ovh_domain_zone_record.navidrome
 tf pihole_dns_record.navidrome                       module.services.pihole_dns_record.navidrome

@@ -77,7 +77,6 @@ terraform/
 helm/
   freshrss/
   darek/
-  sentinel-sre/
 values/
 scripts/
   psql_create_db.sh

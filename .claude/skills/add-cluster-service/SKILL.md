@@ -7,7 +7,7 @@ description: Use when adding a new service or app to this homelab k8s cluster �
 
 Every internet-reachable, SSO-gated service follows the same set of Terraform files.
 `<svc>` = resource/file slug (e.g. `argocd`), `<host>` = subdomain (e.g. `argo`).
-Use an existing service as a copy template: **argocd** (upstream chart) or **sentinel**
+Use an existing service as a copy template: **argocd** (upstream chart) or **darek**
 (local chart + Vault secrets).
 
 ## Files to create (per service)
@@ -70,7 +70,7 @@ Inject the secret into the chart via `set_sensitive` in `<svc>.tf` (see `monitor
 
 ## 3. Vault + External Secrets (`<svc>-vault.tf`, if the app needs secrets)
 
-Store secrets in Vault under `secret/<app>/<name>` first. Then copy `sentinel-vault.tf`:
+Store secrets in Vault under `secret/<app>/<name>` first. Then copy `darek.tf`:
 `kubernetes_service_account` → `vault_policy` (read `secret/data/<app>/*` +
 `secret/metadata/<app>/*`) → `vault_kubernetes_auth_backend_role` (bound to the SA/ns) →
 `SecretStore` named `vault-backend` → `ExternalSecret`s (`dataFrom.extract` for whole
