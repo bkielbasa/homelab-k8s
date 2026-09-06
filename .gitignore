@@ -58,3 +58,8 @@ aws-credentials
 # Local development
 local/
 dev/
+
+# Nix
+result
+result-*
+.direnv/
