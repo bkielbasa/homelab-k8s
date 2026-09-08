@@ -150,6 +150,68 @@ resource "ovh_domain_zone_record" "cloudlift_run_autodiscover" {
   target    = "mail.cloudlift.run."
 }
 
+# ---------------------------------------------------------------------------
+# Service location records for mail clients.
+#
+# Clients discover settings three ways and each needs its own record set: the
+# CNAMEs above cover Outlook's autodiscover URL and Thunderbird's autoconfig
+# URL, while clients implementing RFC 6186 (and Outlook's SRV lookup) find the
+# servers here instead. Both mail zones are served by the same host, so they
+# get the same records.
+#
+# Only ports confirmed reachable from the internet are published: pointing a
+# client at a port the router does not forward makes discovery fail where it
+# would otherwise have fallen back to a working default. 993 and 465 are both
+# confirmed — Outlook's connector reached them from outside.
+# ---------------------------------------------------------------------------
+locals {
+  mail_srv_records = merge([
+    for zone in ["cloudlift.run", "cloudlift.pl"] : {
+      # priority weight port target
+      "${zone}|imaps" = {
+        zone      = zone
+        subdomain = "_imaps._tcp"
+        target    = "0 1 993 mail.${zone}."
+      }
+      "${zone}|submissions" = {
+        zone      = zone
+        subdomain = "_submissions._tcp"
+        target    = "0 1 465 mail.${zone}."
+      }
+      "${zone}|autodiscover" = {
+        zone      = zone
+        subdomain = "_autodiscover._tcp"
+        target    = "0 1 443 autodiscover.${zone}."
+      }
+    }
+  ]...)
+}
+
+resource "ovh_domain_zone_record" "mail_srv" {
+  for_each = local.mail_srv_records
+
+  zone      = each.value.zone
+  subdomain = each.value.subdomain
+  fieldtype = "SRV"
+  ttl       = 3600
+  target    = each.value.target
+}
+
+# Submission over STARTTLS on 587. The listener exists and the LoadBalancer
+# publishes it, but the router forward has not been confirmed, and a published
+# SRV record would send RFC 6186 clients to it. Uncomment once 587/tcp reaches
+# 192.168.1.31 from outside.
+#
+# resource "ovh_domain_zone_record" "mail_srv_submission" {
+#   for_each = toset(["cloudlift.run", "cloudlift.pl"])
+#
+#   zone      = each.value
+#   subdomain = "_submission._tcp"
+#   fieldtype = "SRV"
+#   ttl       = 3600
+#   target    = "0 1 587 mail.${each.value}."
+# }
+
 # LAN DNS — Pi-hole overrides so home clients bypass the missing hairpin NAT.
 # autoconfig/autodiscover (HTTPS) -> ingress controller; mail (IMAP/SMTP) -> mail LB.
 resource "pihole_dns_record" "cloudlift_autoconfig" {
