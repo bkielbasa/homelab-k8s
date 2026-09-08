@@ -1,14 +1,13 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.4
+  tag: v0.0.5
   pullPolicy: Always
 
 ingress:
   enabled: true
   className: nginx
   hosts:
-    - mail.klimczak.xyz
-    - klimczak.xyz
+    - mail.cloudlift.pl
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -21,7 +20,7 @@ tls:
 dkim:
   enabled: false
   secretName: workspace-dkim
-  domain: klimczak.xyz
+  domain: cloudlift.pl
   selector: default
 
 # workspace-db Secret must exist in the workspace namespace before install.

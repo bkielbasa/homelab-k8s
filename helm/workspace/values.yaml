@@ -18,7 +18,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - mail.klimczak.xyz
+    - mail.cloudlift.pl
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -37,7 +37,7 @@ migrations:
 dkim:
   enabled: false
   secretName: workspace-dkim
-  domain: klimczak.xyz
+  domain: cloudlift.pl
   selector: default
 
 databaseUrlSecret:
