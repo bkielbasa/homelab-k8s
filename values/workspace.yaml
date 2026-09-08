@@ -6,8 +6,7 @@ image:
 ingress:
   enabled: true
   className: nginx
-  hosts:
-    - mail.cloudlift.run
+  host: mail.cloudlift.run
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
