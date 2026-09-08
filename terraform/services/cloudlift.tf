@@ -88,3 +88,64 @@ resource "ovh_domain_zone_record" "cloudlift_autodiscover" {
 # }
 #
 # grafana.cloudlift.pl was 130.61.226.152 (OCI) — decide whether it moves to OVH too.
+
+# ---------------------------------------------------------------------------
+# cloudlift.run (mail moved here — customer address contact@cloudlift.run)
+# Zone already exists on OVH (served by ns110/dns110.ovh.net, DNSSEC signed).
+# OVH default records that conflict are removed manually via the go-ovh helper
+# (/tmp/opencode/zoneops): default SPF "include:mx.ovh.com -all" and the
+# mx1/2/3.mail.ovh.net MX set.
+# ---------------------------------------------------------------------------
+
+# mail.cloudlift.run -> public IP
+resource "ovh_domain_zone_record" "cloudlift_run_mail" {
+  zone      = "cloudlift.run"
+  subdomain = "mail"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.cloudlift_public_ip
+}
+
+# MX: cloudlift.run -> mail.cloudlift.run
+resource "ovh_domain_zone_record" "cloudlift_run_mx" {
+  zone      = "cloudlift.run"
+  subdomain = ""
+  fieldtype = "MX"
+  ttl       = 3600
+  target    = "1 mail.cloudlift.run."
+}
+
+# SPF (apex TXT)
+resource "ovh_domain_zone_record" "cloudlift_run_spf" {
+  zone      = "cloudlift.run"
+  subdomain = ""
+  fieldtype = "TXT"
+  ttl       = 3600
+  target    = "v=spf1 mx include:mx.ovh.com a include:_spf.mlsend.com ~all"
+}
+
+# DMARC
+resource "ovh_domain_zone_record" "cloudlift_run_dmarc" {
+  zone      = "cloudlift.run"
+  subdomain = "_dmarc"
+  fieldtype = "TXT"
+  ttl       = 3600
+  target    = "v=DMARC1; p=quarantine; rua=mailto:admin@cloudlift.run; ruf=mailto:admin@cloudlift.run; fo=1"
+}
+
+# Apple auto-discovery helpers -> mail.cloudlift.run
+resource "ovh_domain_zone_record" "cloudlift_run_autoconfig" {
+  zone      = "cloudlift.run"
+  subdomain = "autoconfig"
+  fieldtype = "CNAME"
+  ttl       = 3600
+  target    = "mail.cloudlift.run."
+}
+
+resource "ovh_domain_zone_record" "cloudlift_run_autodiscover" {
+  zone      = "cloudlift.run"
+  subdomain = "autodiscover"
+  fieldtype = "CNAME"
+  ttl       = 3600
+  target    = "mail.cloudlift.run."
+}
