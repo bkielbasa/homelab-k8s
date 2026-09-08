@@ -149,3 +149,20 @@ resource "ovh_domain_zone_record" "cloudlift_run_autodiscover" {
   ttl       = 3600
   target    = "mail.cloudlift.run."
 }
+
+# LAN DNS — Pi-hole overrides so home clients bypass the missing hairpin NAT.
+# autoconfig/autodiscover (HTTPS) -> ingress controller; mail (IMAP/SMTP) -> mail LB.
+resource "pihole_dns_record" "cloudlift_autoconfig" {
+  domain = "autoconfig.cloudlift.run"
+  ip     = "192.168.1.30"
+}
+
+resource "pihole_dns_record" "cloudlift_autodiscover" {
+  domain = "autodiscover.cloudlift.run"
+  ip     = "192.168.1.30"
+}
+
+resource "pihole_dns_record" "cloudlift_mail" {
+  domain = "mail.cloudlift.run"
+  ip     = "192.168.1.31"
+}
