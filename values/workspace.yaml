@@ -7,6 +7,9 @@ ingress:
   enabled: true
   className: nginx
   host: mail.cloudlift.run
+  extraHosts:
+    - autodiscover.cloudlift.run
+    - autoconfig.cloudlift.run
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
