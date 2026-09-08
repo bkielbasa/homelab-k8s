@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.8
+  tag: v0.0.9
   pullPolicy: Always
 
 ingress:
@@ -21,6 +21,9 @@ dkim:
   secretName: workspace-dkim
   domain: cloudlift.pl
   selector: default
+
+# canonical host advertised by autoconfig/autodiscover responses
+mailHost: mail.cloudlift.run
 
 # workspace-db Secret must exist in the workspace namespace before install.
 # Create it with:
