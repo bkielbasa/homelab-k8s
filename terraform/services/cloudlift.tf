@@ -9,10 +9,10 @@
 # Cloudflare's proxy (apex A, www, grafana, ...) need a human decision about the
 # real origin IP — they are listed as comments further down.
 
-# current homelab public IP (var.public_ip default is stale at 212.87.243.126)
+# homelab public IP (confirmed via cluster egress: 212.87.243.126)
 variable "cloudlift_public_ip" {
   type    = string
-  default = "79.76.117.19"
+  default = "212.87.243.126"
 }
 
 # mail.cloudlift.pl -> public IP (used by IMAPS 993 / SMTPS 465 / HTTPS)
