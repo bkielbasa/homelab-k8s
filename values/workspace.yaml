@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.25
+  tag: v0.0.26
   pullPolicy: Always
 
 ingress:
