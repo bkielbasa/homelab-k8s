@@ -10,12 +10,6 @@ ingress:
   extraHosts:
     - autodiscover.cloudlift.run
     - autoconfig.cloudlift.run
-    # cloudlift.pl is a hosted mail domain too, so its clients need the same
-    # discovery hosts and, because IMAPS/SMTPS present this certificate,
-    # mail.cloudlift.pl has to be a SAN or TLS verification fails there.
-    - mail.cloudlift.pl
-    - autodiscover.cloudlift.pl
-    - autoconfig.cloudlift.pl
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -28,7 +22,7 @@ tls:
 dkim:
   enabled: false
   secretName: workspace-dkim
-  domain: cloudlift.pl
+  domain: cloudlift.run
   selector: default
 
 # canonical host advertised by autoconfig/autodiscover responses
