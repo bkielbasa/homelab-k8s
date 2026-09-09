@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.20
+  tag: v0.0.21
   pullPolicy: Always
 
 ingress:
@@ -10,6 +10,9 @@ ingress:
   extraHosts:
     - autodiscover.cloudlift.run
     - autoconfig.cloudlift.run
+    # Serves CardDAV and CalDAV over HTTPS. The mail host cannot: on the LAN
+    # it resolves to the mail load balancer, which has no HTTPS port.
+    - dav.cloudlift.run
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -27,6 +30,9 @@ dkim:
 
 # canonical host advertised by autoconfig/autodiscover responses
 mailHost: mail.cloudlift.run
+
+# host advertised for CardDAV and CalDAV
+davHost: dav.cloudlift.run
 
 # workspace-db Secret must exist in the workspace namespace before install.
 # Create it with:

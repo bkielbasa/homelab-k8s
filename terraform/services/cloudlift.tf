@@ -131,6 +131,17 @@ resource "ovh_domain_zone_record" "mail_srv" {
 #   target    = "0 1 587 mail.${each.value}."
 # }
 
+# dav.cloudlift.run -> the ingress, for CardDAV and CalDAV over HTTPS. The mail
+# host is not usable for them: on the LAN it points at the mail load balancer,
+# which publishes no HTTPS port.
+resource "ovh_domain_zone_record" "cloudlift_run_dav" {
+  zone      = "cloudlift.run"
+  subdomain = "dav"
+  fieldtype = "CNAME"
+  ttl       = 3600
+  target    = "mail.cloudlift.run."
+}
+
 # LAN DNS — Pi-hole overrides so home clients bypass the missing hairpin NAT.
 # autoconfig/autodiscover (HTTPS) -> ingress controller; mail (IMAP/SMTP) -> mail LB.
 resource "pihole_dns_record" "cloudlift_autoconfig" {
@@ -146,4 +157,9 @@ resource "pihole_dns_record" "cloudlift_autodiscover" {
 resource "pihole_dns_record" "cloudlift_mail" {
   domain = "mail.cloudlift.run"
   ip     = "192.168.1.31"
+}
+
+resource "pihole_dns_record" "cloudlift_dav" {
+  domain = "dav.cloudlift.run"
+  ip     = "192.168.1.30"
 }
