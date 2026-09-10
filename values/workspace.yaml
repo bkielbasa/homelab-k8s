@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.30
+  tag: v0.0.31
   pullPolicy: Always
 
 ingress:
@@ -55,19 +55,19 @@ mailService:
   ports:
     smtp:
       port: 25
-      targetPort: 2526
+      targetPort: 2525
     submission:
       port: 587
-      targetPort: 2588
+      targetPort: 2587
     smtps:
       port: 465
-      targetPort: 2466
+      targetPort: 2465
     imap:
       port: 143
-      targetPort: 1144
+      targetPort: 1143
     imaps:
       port: 993
-      targetPort: 1994
+      targetPort: 1993
 
 livenessProbe:
   httpGet:
