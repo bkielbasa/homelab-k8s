@@ -11,59 +11,104 @@ data:
 
     CREATE TABLE users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
+
         display_name TEXT NOT NULL,
+
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
+
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX users_email_idx ON users(email);
-
+    CREATE INDEX users_email_idx
+    ON users(email);
   002_mailboxes.up.sql: |
     CREATE TABLE mailboxes (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        uid_validity BIGINT NOT NULL DEFAULT 1,
+
         name TEXT NOT NULL,
+
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
         UNIQUE(user_id, name)
     );
 
-    CREATE INDEX mailboxes_user_id_idx ON mailboxes(user_id);
-
+    CREATE INDEX mailboxes_user_id_idx
+    ON mailboxes(user_id);
   003_messages.up.sql: |
     CREATE TABLE messages (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
         mailbox_id UUID NOT NULL REFERENCES mailboxes(id) ON DELETE CASCADE,
+
+        -- IMAP sequence number within the mailbox
+        uid BIGSERIAL,
+
+        -- RFC 5322 Message-ID header
         message_id TEXT,
+
+        -- Envelope
         sender TEXT NOT NULL,
         recipients TEXT[] NOT NULL DEFAULT '{}',
+
+        -- Common headers
         subject TEXT,
+
+        -- Threading headers
         in_reply_to TEXT,
         references_header TEXT,
+        thread_id UUID,
+
+        -- Message content
         raw_message TEXT NOT NULL,
+
+        -- MIME information
         mime_type TEXT,
         charset TEXT,
+
+        -- Size
         size_bytes BIGINT NOT NULL DEFAULT 0,
+
+        -- IMAP flags
         seen BOOLEAN NOT NULL DEFAULT FALSE,
         flagged BOOLEAN NOT NULL DEFAULT FALSE,
         answered BOOLEAN NOT NULL DEFAULT FALSE,
         deleted BOOLEAN NOT NULL DEFAULT FALSE,
         draft BOOLEAN NOT NULL DEFAULT FALSE,
+
+        -- Delivery metadata
         received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         sent_at TIMESTAMPTZ,
+
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX messages_mailbox_id_idx ON messages(mailbox_id);
-    CREATE INDEX messages_message_id_idx ON messages(message_id);
-    CREATE INDEX messages_received_at_idx ON messages(received_at DESC);
-    CREATE INDEX messages_sender_idx ON messages(sender);
+    CREATE INDEX messages_mailbox_id_idx
+    ON messages(mailbox_id);
 
+    CREATE INDEX messages_message_id_idx
+    ON messages(message_id);
+
+    CREATE INDEX messages_received_at_idx
+    ON messages(received_at DESC);
+
+    CREATE INDEX messages_sender_idx
+    ON messages(sender);
+
+    CREATE INDEX idx_messages_mailbox_uid
+    ON messages (mailbox_id, uid);
+
+    CREATE INDEX idx_messages_thread
+    ON messages(thread_id);
   004_outbox.up.sql: |
-    CREATE TABLE IF NOT EXISTS outbox (
+    CREATE TABLE outbox (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         recipient TEXT NOT NULL,
         data TEXT NOT NULL,
@@ -72,76 +117,79 @@ data:
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX IF NOT EXISTS idx_outbox_next_attempt ON outbox (next_attempt_at);
-
-  005_uids.up.sql: |
-    ALTER TABLE messages ADD COLUMN IF NOT EXISTS uid BIGSERIAL;
-    CREATE INDEX IF NOT EXISTS idx_messages_mailbox_uid ON messages (mailbox_id, uid);
-
-  006_contacts.up.sql: |
-    CREATE TABLE IF NOT EXISTS contacts (
+    CREATE INDEX idx_outbox_next_attempt
+    ON outbox (next_attempt_at);
+  005_contacts.up.sql: |
+    CREATE TABLE contacts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL,
+
         email TEXT NOT NULL,
+        emails TEXT,
+        phones TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        company TEXT,
+        title TEXT,
         name TEXT,
+
         etag TEXT NOT NULL,
+        vcard TEXT NOT NULL,
         updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_contacts_user_email ON contacts(user_id, email);
-
-  007_events.up.sql: |
-    CREATE TABLE IF NOT EXISTS events (
+    CREATE UNIQUE INDEX idx_contacts_user_email
+    ON contacts(user_id, email);
+  006_events.up.sql: |
+    -- CalDAV clients address an event by the resource name in the PUT URL (often
+    -- not a UUID) and expect to GET the same iCalendar body back at that href.
+    -- starts_at/ends_at are best-effort for the web UI and may be null for all-day,
+    -- floating, or recurring events.
+    CREATE TABLE events (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL,
         title TEXT,
-        starts_at TIMESTAMP NOT NULL,
-        ends_at TIMESTAMP NOT NULL,
+        starts_at TIMESTAMP,
+        ends_at TIMESTAMP,
         etag TEXT NOT NULL,
+        ics TEXT,
+        uid TEXT,
+        resource TEXT,
         updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);
+    CREATE INDEX idx_events_user
+    ON events(user_id);
 
-  008_threads.up.sql: |
-    ALTER TABLE messages ADD COLUMN IF NOT EXISTS thread_id UUID;
-    CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages(thread_id);
-
-  009_labels.up.sql: |
-    CREATE TABLE IF NOT EXISTS labels (
+    CREATE UNIQUE INDEX idx_events_user_resource
+    ON events (user_id, resource);
+  007_labels.up.sql: |
+    CREATE TABLE labels (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL,
         name TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS message_labels (
+    CREATE TABLE message_labels (
         message_id UUID NOT NULL,
         label_id UUID NOT NULL,
         PRIMARY KEY (message_id, label_id)
     );
 
-    CREATE INDEX IF NOT EXISTS idx_labels_user ON labels(user_id);
-
-  010_mailbox_uid_validity.up.sql: |
-    ALTER TABLE mailboxes ADD COLUMN IF NOT EXISTS uid_validity BIGINT NOT NULL DEFAULT 1;
-
-  010_mailbox_uid_validity.down.sql: |
-    ALTER TABLE mailboxes DROP COLUMN IF EXISTS uid_validity;
-
-  011_domains.up.sql: |
-    CREATE TABLE IF NOT EXISTS domains (
+    CREATE INDEX idx_labels_user ON labels(user_id);
+  008_domains.up.sql: |
+    CREATE TABLE domains (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS domains_name_idx ON domains (name);
-
-  012_aliases.up.sql: |
-    CREATE TABLE IF NOT EXISTS aliases (
+    CREATE UNIQUE INDEX domains_name_idx ON domains (name);
+  009_aliases.up.sql: |
+    CREATE TABLE aliases (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         domain_id UUID NOT NULL REFERENCES domains (id) ON DELETE CASCADE,
         address TEXT NOT NULL,
@@ -150,11 +198,10 @@ data:
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS aliases_address_idx ON aliases (address);
-    CREATE INDEX IF NOT EXISTS aliases_domain_id_idx ON aliases (domain_id);
-
-  013_sessions.up.sql: |
-    CREATE TABLE IF NOT EXISTS sessions (
+    CREATE UNIQUE INDEX aliases_address_idx ON aliases (address);
+    CREATE INDEX aliases_domain_id_idx ON aliases (domain_id);
+  010_sessions.up.sql: |
+    CREATE TABLE sessions (
         token_hash TEXT PRIMARY KEY,
         user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -162,6 +209,12 @@ data:
         last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX IF NOT EXISTS sessions_user_id_idx ON sessions (user_id);
-    CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions (expires_at);
+    CREATE INDEX sessions_user_id_idx ON sessions (user_id);
+    CREATE INDEX sessions_expires_at_idx ON sessions (expires_at);
+  011_event_details.up.sql: |
+    -- Structured fields for the web calendar. The raw ICS body remains the
+    -- CalDAV round-trip payload; these columns power the week view and Encode.
+    ALTER TABLE events
+        ADD COLUMN location TEXT NOT NULL DEFAULT '',
+        ADD COLUMN description TEXT NOT NULL DEFAULT '';
 {{- end }}
