@@ -65,6 +65,9 @@ spec:
             - name: smtp
               containerPort: {{ .Values.mailService.ports.smtp.targetPort }}
               protocol: TCP
+            - name: submission
+              containerPort: {{ .Values.mailService.ports.submission.targetPort }}
+              protocol: TCP
             - name: smtps
               containerPort: {{ .Values.mailService.ports.smtps.targetPort }}
               protocol: TCP

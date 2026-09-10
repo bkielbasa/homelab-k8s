@@ -55,16 +55,19 @@ mailService:
   ports:
     smtp:
       port: 25
-      targetPort: 2525
+      targetPort: 2526
+    submission:
+      port: 587
+      targetPort: 2588
     smtps:
       port: 465
-      targetPort: 2465
+      targetPort: 2466
     imap:
       port: 143
-      targetPort: 1143
+      targetPort: 1144
     imaps:
       port: 993
-      targetPort: 1993
+      targetPort: 1994
 
 livenessProbe:
   httpGet:

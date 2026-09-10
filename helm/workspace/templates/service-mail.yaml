@@ -16,6 +16,10 @@ spec:
       port: {{ .Values.mailService.ports.smtp.port }}
       targetPort: {{ .Values.mailService.ports.smtp.targetPort }}
       protocol: TCP
+    - name: submission
+      port: {{ .Values.mailService.ports.submission.port }}
+      targetPort: {{ .Values.mailService.ports.submission.targetPort }}
+      protocol: TCP
     - name: smtps
       port: {{ .Values.mailService.ports.smtps.port }}
       targetPort: {{ .Values.mailService.ports.smtps.targetPort }}
