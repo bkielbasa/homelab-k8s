@@ -141,15 +141,16 @@ resource "ovh_domain_zone_record" "mail_srv" {
 #   target    = "0 1 587 mail.${each.value}."
 # }
 
-# dav.cloudlift.run -> the ingress, for CardDAV and CalDAV over HTTPS. The mail
-# host is not usable for them: on the LAN it points at the mail load balancer,
-# which publishes no HTTPS port.
+# dav.cloudlift.run -> public IP (ingress, for CardDAV and CalDAV over HTTPS).
+# This must be an A record, not a CNAME to mail: on the LAN, mail resolves
+# to the mail load balancer (no HTTPS port), and resolvers that follow the
+# CNAME end up at the dead 192.168.1.31:443 instead of the ingress.
 resource "ovh_domain_zone_record" "cloudlift_run_dav" {
   zone      = "cloudlift.run"
   subdomain = "dav"
-  fieldtype = "CNAME"
+  fieldtype = "A"
   ttl       = 3600
-  target    = "mail.cloudlift.run."
+  target    = var.cloudlift_public_ip
 }
 
 # LAN DNS — Pi-hole overrides so home clients bypass the missing hairpin NAT.
