@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.57
+  tag: v0.0.58
   pullPolicy: Always
 
 ingress:
@@ -18,6 +18,8 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod-dns
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # WebDAV uploads bypass nginx's 1m default body limit.
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
 
 tls:
   enabled: true
