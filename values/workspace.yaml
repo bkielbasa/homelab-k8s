@@ -99,5 +99,5 @@ samba:
     metallb.universe.tf/loadBalancerIPs: 192.168.1.32
   image:
     repository: bartlomiejklimczak/workspace-samba
-    tag: v0.0.70
+    tag: v0.0.71
     pullPolicy: Always
