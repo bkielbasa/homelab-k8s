@@ -26,14 +26,7 @@ resource "ovh_domain_zone_record" "cloudlift_run_mail" {
   target    = var.cloudlift_public_ip
 }
 
-# files.cloudlift.run -> public IP (Samba file sharing, port 445).
-resource "ovh_domain_zone_record" "cloudlift_run_files" {
-  zone      = "cloudlift.run"
-  subdomain = "files"
-  fieldtype = "A"
-  ttl       = 3600
-  target    = var.cloudlift_public_ip
-}
+# files.cloudlift.run record removed with the Samba service.
 
 # cloudlift.run (apex) -> public IP — serves the web login page
 # (replaces the OVH default parked page at 213.186.33.5).
@@ -179,11 +172,7 @@ resource "pihole_dns_record" "cloudlift_mail" {
   ip     = "192.168.1.31"
 }
 
-# LAN clients reach Samba directly, bypassing missing hairpin NAT.
-resource "pihole_dns_record" "cloudlift_files" {
-  domain = "files.cloudlift.run"
-  ip     = "192.168.1.32"
-}
+# LAN files record removed with the Samba service.
 
 resource "pihole_dns_record" "cloudlift_apex" {
   domain = "cloudlift.run"
