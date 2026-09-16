@@ -47,34 +47,3 @@ resource "kubernetes_manifest" "metallb_l2_adv" {
     }
   }
 }
-
-resource "kubernetes_manifest" "metallb_samba_ip_pool" {
-  depends_on = [helm_release.metallb]
-
-  manifest = {
-    apiVersion = "metallb.io/v1beta1"
-    kind       = "IPAddressPool"
-    metadata = {
-      name      = "samba-ip-pool"
-      namespace = "metallb"
-    }
-    spec = {
-      addresses  = ["192.168.1.32/32"]
-      autoAssign = false
-    }
-  }
-}
-
-resource "kubernetes_manifest" "metallb_samba_l2_adv" {
-  manifest = {
-    apiVersion = "metallb.io/v1beta1"
-    kind       = "L2Advertisement"
-    metadata = {
-      name      = "samba-adv"
-      namespace = "metallb"
-    }
-    spec = {
-      ipAddressPools = ["samba-ip-pool"]
-    }
-  }
-}
