@@ -90,4 +90,6 @@ resources:
     cpu: 50m
     memory: 64Mi
   limits:
-    memory: 256Mi
+    # ffmpeg decodes iPhone HEVC MOVs for gallery posters in-process; a
+    # 1080p clip spikes well past 256Mi, and the OOM killer eats the job.
+    memory: 1Gi
