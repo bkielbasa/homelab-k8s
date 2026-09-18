@@ -53,3 +53,11 @@ resource "vault_kv_secret_v2" "oidc_freshrss" {
     clientSecret = authentik_provider_oauth2.freshrss.client_secret
   })
 }
+
+resource "vault_kv_secret_v2" "oidc_workspace" {
+  mount = "secret"
+  name  = "oidc/workspace"
+  data_json = jsonencode({
+    clientSecret = authentik_provider_oauth2.workspace.client_secret
+  })
+}

@@ -1,6 +1,6 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.97
+  tag: v0.0.98
   pullPolicy: Always
 
 ingress:
@@ -34,6 +34,20 @@ dkim:
 
 # canonical host advertised by autoconfig/autodiscover responses
 mailHost: mail.cloudlift.run
+
+# OIDC sign-in through Authentik. clientSecret comes from the workspace-sso
+# ExternalSecret (Vault secret/oidc/workspace), created in
+# terraform/services/workspace.tf.
+sso:
+  enabled: true
+  issuer: https://authentik.klimczak.xyz/application/o/workspace/
+  clientID: workspace
+  clientSecretSecret:
+    name: workspace-sso
+    key: OIDC_CLIENT_SECRET
+  providerName: Authentik
+  redirectURL: https://mail.cloudlift.run/login/sso/callback
+  autoCreate: true
 
 # host advertised for CardDAV and CalDAV
 davHost: dav.cloudlift.run

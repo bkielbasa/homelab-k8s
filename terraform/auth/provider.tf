@@ -6,6 +6,12 @@ provider "kubectl" {
   config_path = "~/.kube/config"
 }
 
+provider "helm" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+}
+
 provider "vault" {
   address = "https://vault.klimczak.xyz"
   token   = var.vault_token

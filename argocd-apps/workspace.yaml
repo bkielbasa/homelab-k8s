@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: workspace
   sources:
-    - repoURL: https://github.com/bkielbasa/homelab-k8s
+    - repoURL: https://github.com/bkielbasa/workspace
       targetRevision: master
       path: helm/workspace
       helm:

@@ -51,6 +51,13 @@ path "secret/data/workspace/*" {
 path "secret/metadata/workspace/*" {
   capabilities = ["read", "list"]
 }
+# OIDC client secret for the Authentik integration.
+path "secret/data/oidc/workspace" {
+  capabilities = ["read"]
+}
+path "secret/metadata/oidc/workspace" {
+  capabilities = ["read"]
+}
 EOT
 }
 
@@ -128,6 +135,43 @@ resource "kubectl_manifest" "workspace_db_external_secret" {
           remoteRef = {
             key      = "workspace/db"
             property = "DATABASE_URL"
+          }
+        },
+      ]
+    }
+  })
+
+  depends_on = [
+    kubectl_manifest.workspace_vault_secret_store,
+  ]
+}
+
+# OIDC client secret synced from Vault so the app can complete the
+# authorization-code dance with Authentik. Written by auth/oidc-secrets.tf.
+resource "kubectl_manifest" "workspace_sso_external_secret" {
+  yaml_body = yamlencode({
+    apiVersion = "external-secrets.io/v1"
+    kind       = "ExternalSecret"
+    metadata = {
+      name      = "workspace-sso"
+      namespace = kubernetes_namespace.workspace.metadata[0].name
+    }
+    spec = {
+      refreshInterval = "1h"
+      secretStoreRef = {
+        name = "vault-backend"
+        kind = "SecretStore"
+      }
+      target = {
+        name           = "workspace-sso"
+        creationPolicy = "Owner"
+      }
+      data = [
+        {
+          secretKey = "OIDC_CLIENT_SECRET"
+          remoteRef = {
+            key      = "oidc/workspace"
+            property = "clientSecret"
           }
         },
       ]
