@@ -6,6 +6,27 @@ resource "authentik_group" "workspace_users" {
   name = "workspace-users"
 }
 
+# For single-operator Authentik there is no email-verification source, so the
+# managed email scope mapping always returns email_verified=False — and the
+# app correctly refuses an "unverified" address. This custom scope mapping
+# asserts verified on behalf of the IdP: the operator vouches for the
+# directory. We remove the managed email mapping from this provider's scope
+# list so both don't claim the same "email" scope.
+resource "authentik_property_mapping_provider_scope" "workspace_email" {
+  name       = "workspace-email-verified"
+  scope_name = "email"
+  expression = <<-EOF
+    return {
+        "email": request.user.email,
+        "email_verified": True,
+    }
+  EOF
+}
+
+data "authentik_property_mapping_provider_scope" "email_default" {
+  managed = "goauthentik.io/providers/oauth2/scope-email"
+}
+
 resource "authentik_provider_oauth2" "workspace" {
   name               = "workspace"
   client_id          = "workspace"
@@ -21,8 +42,14 @@ resource "authentik_provider_oauth2" "workspace" {
   ]
 
   property_mappings = concat(
-    data.authentik_property_mapping_provider_scope.scopes.ids,
-    [authentik_property_mapping_provider_scope.groups.id],
+    [
+      for id in data.authentik_property_mapping_provider_scope.scopes.ids :
+      id if id != data.authentik_property_mapping_provider_scope.email_default.id
+    ],
+    [
+      authentik_property_mapping_provider_scope.workspace_email.id,
+      authentik_property_mapping_provider_scope.groups.id,
+    ],
   )
 }
 
