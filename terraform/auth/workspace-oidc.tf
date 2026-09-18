@@ -16,7 +16,7 @@ resource "authentik_provider_oauth2" "workspace" {
   allowed_redirect_uris = [
     {
       matching_mode = "strict"
-      url           = "https://mail.cloudlift.run/login/sso/callback"
+      url           = "https://cloudlift.run/login/sso/callback"
     },
   ]
 

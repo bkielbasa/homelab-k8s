@@ -46,7 +46,7 @@ sso:
     name: workspace-sso
     key: OIDC_CLIENT_SECRET
   providerName: Authentik
-  redirectURL: https://mail.cloudlift.run/login/sso/callback
+  redirectURL: https://cloudlift.run/login/sso/callback
   autoCreate: true
 
 # host advertised for CardDAV and CalDAV
