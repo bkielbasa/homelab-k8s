@@ -42,6 +42,9 @@ resource "helm_release" "loki" {
   namespace  = "monitoring"
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki"
+  # Pinned to the version already running: unpinned, any apply would pull
+  # the latest chart and upgrade Loki as a side effect.
+  version    = "7.1.0"
 
   values = [
     file("${path.module}/../../values/loki.yaml")

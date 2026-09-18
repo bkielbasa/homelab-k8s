@@ -24,6 +24,18 @@ loki:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     retention_period: 744h
+    # Let the delete API rewrite matching lines out of existing chunks.
+    deletion_mode: filter-and-delete
+
+  # Without a compactor block Loki silently ignores retention_period and
+  # answers the delete API with a 404, so neither policy was in force.
+  compactor:
+    working_directory: /var/loki/compactor
+    delete_request_store: filesystem
+    retention_enabled: true
+    # Grace window in which a delete request can still be cancelled;
+    # the default 24h would stall an urgent purge for a day.
+    delete_request_cancel_period: 1m
 
   # Match the "entry too far behind" cutoff to reject_old_samples_max_age.
   # Loki rejects entries older than max_chunk_age/2, so a 2h default => 1h cutoff,
