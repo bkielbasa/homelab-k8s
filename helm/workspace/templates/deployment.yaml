@@ -6,6 +6,7 @@ metadata:
     {{- include "workspace.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       {{- include "workspace.selectorLabels" . | nindent 6 }}
