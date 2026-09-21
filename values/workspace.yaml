@@ -1,8 +1,7 @@
 image:
   repository: bartlomiejklimczak/workspace
-  tag: v0.0.103
+  tag: v0.0.104
   pullPolicy: Always
-
 ingress:
   enabled: true
   className: nginx
@@ -20,21 +19,17 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     # WebDAV uploads bypass nginx's 1m default body limit.
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-
 tls:
   enabled: true
   secretName: workspace-tls
   clusterIssuer: letsencrypt-prod-dns
-
 dkim:
   enabled: false
   secretName: workspace-dkim
   domain: cloudlift.run
   selector: default
-
 # canonical host advertised by autoconfig/autodiscover responses
 mailHost: mail.cloudlift.run
-
 # OIDC sign-in through Authentik. clientSecret comes from the workspace-sso
 # ExternalSecret (Vault secret/oidc/workspace), created in
 # terraform/services/workspace.tf.
@@ -48,10 +43,8 @@ sso:
   providerName: Authentik
   redirectURL: https://cloudlift.run/login/sso/callback
   autoCreate: true
-
 # host advertised for CardDAV and CalDAV
 davHost: dav.cloudlift.run
-
 # workspace-db Secret must exist in the workspace namespace before install.
 # Create it with:
 #   kubectl create secret generic workspace-db \
@@ -61,7 +54,6 @@ davHost: dav.cloudlift.run
 databaseUrlSecret:
   name: workspace-db
   key: DATABASE_URL
-
 mailService:
   enabled: true
   type: LoadBalancer
@@ -84,21 +76,18 @@ mailService:
     imaps:
       port: 993
       targetPort: 1993
-
 livenessProbe:
   httpGet:
     path: /healthz
     port: http
   initialDelaySeconds: 15
   periodSeconds: 20
-
 readinessProbe:
   httpGet:
     path: /healthz
     port: http
   initialDelaySeconds: 5
   periodSeconds: 10
-
 resources:
   requests:
     cpu: 50m
