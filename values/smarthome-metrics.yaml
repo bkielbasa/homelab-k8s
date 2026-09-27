@@ -7,6 +7,12 @@ database:
   port: 5432
   user: "homelabmetrics"
   name: "homelabmetrics"
-  existingSecret: smarthome/postgresql
-  existingSecretPasswordKey: password
+  # DATABASE_URL is synced into the smarthome namespace by the
+  # smarthome-metrics-db ExternalSecret (see
+  # terraform/services/smarthome-metrics.tf). A secretKeyRef cannot cross
+  # namespaces, so the credentials are materialised here rather than read
+  # in place from the postgresql namespace — `existingSecret` must be a bare
+  # name, never "namespace/name".
+  existingSecret: smarthome-metrics-env
+  urlSecretKey: DATABASE_URL
 

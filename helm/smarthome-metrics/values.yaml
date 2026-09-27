@@ -36,6 +36,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8088
+  # nodePort: 30088 # Only used when type is NodePort; omit to auto-assign
 
 database:
   # Hostname or cluster service for external PostgreSQL

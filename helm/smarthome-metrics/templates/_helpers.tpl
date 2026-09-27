@@ -60,11 +60,18 @@ Create the name of the service account to use
 
 {{/*
 Database secret name
+
+A secretKeyRef can only name a Secret in the pod's own namespace, so
+database.existingSecret must be a bare name. Fail at render time rather than
+letting the API server reject the Deployment on every sync retry.
 */}}
 {{- define "smarthome-metrics.secretName" -}}
-{{- if .Values.database.existingSecret }}
-{{- .Values.database.existingSecret }}
-{{- else }}
-{{- printf "%s-db" (include "smarthome-metrics.fullname" .) }}
-{{- end }}
+{{- if .Values.database.existingSecret -}}
+{{- if contains "/" .Values.database.existingSecret -}}
+{{- fail (printf "database.existingSecret must be a bare secret name in the release namespace, not %q; sync the credentials into this namespace instead" .Values.database.existingSecret) -}}
+{{- end -}}
+{{- .Values.database.existingSecret -}}
+{{- else -}}
+{{- printf "%s-db" (include "smarthome-metrics.fullname" .) -}}
+{{- end -}}
 {{- end }}
