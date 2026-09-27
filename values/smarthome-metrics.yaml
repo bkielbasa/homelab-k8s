@@ -1,0 +1,12 @@
+service:
+  type: NodePort
+  nodePort: 30088 # Optional: fixed port (30000-32767), or omit to auto-assign
+
+database:
+  host: "postgresql.postgresql.svc.cluster.local"
+  port: 5432
+  user: "homelabmetrics"
+  name: "homelabmetrics"
+  existingSecret: smarthome/postgresql
+  existingSecretPasswordKey: password
+
