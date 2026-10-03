@@ -1,0 +1,76 @@
+# Cluster-specific values for the ecommerce chart live in values/ecommerce.yaml
+# (referenced by the Argo CD Application through $values). The defaults below
+# only need to be overridden when a value cannot be expressed per-cluster.
+
+replicaCount: 1
+
+image:
+  repository: bartlomiejklimczak/ecommerce
+  pullPolicy: IfNotPresent
+  tag: ""
+
+# The ServiceAccount is created by Terraform (see terraform/services/ecommerce.tf)
+# so the Vault Kubernetes auth role has a stable name to bind to.
+serviceAccount:
+  create: false
+  name: ecommerce-sa
+
+# Env (including DATABASE_URL) is synced from Vault by external-secrets into a
+# Secret named `ecommerce-env`. Set to true only for local/kind testing without
+# Vault — the chart then creates the Secret from `.Values.secrets`.
+envSecret:
+  create: false
+
+# Only used when envSecret.create is true. Keys become env vars verbatim, so
+# they must match the names the app expects (e.g. DATABASE_URL).
+secrets: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  # Must match the port the app binds inside the container.
+  port: 3000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ecommerce.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 256Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 64Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

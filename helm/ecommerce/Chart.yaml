@@ -1,0 +1,10 @@
+apiVersion: v2
+name: ecommerce
+description: Storefront served from bartlomiejklimczak/ecommerce
+
+type: application
+
+version: 0.1.0
+
+# Also the default image tag; override per-cluster in values/ecommerce.yaml.
+appVersion: "v0.1.0"

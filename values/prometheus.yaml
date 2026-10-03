@@ -44,10 +44,105 @@ grafana:
       alertmanager:
         enabled: false
 
+  # Auto-load the smarthome-metrics dashboards straight from GitHub.
+  # A git-sync sidecar clones the repo into a shared emptyDir; Grafana's
+  # dashboardProviders below watches that directory and picks up changes
+  # every 30s, so a push to master shows up with no rebuild and no ConfigMap.
+  extraVolumes:
+    - name: git-dashboards
+      emptyDir: {}
+
+  extraVolumeMounts:
+    - name: git-dashboards
+      mountPath: /var/lib/grafana/dashboards-git
+      readOnly: true
+
+  # NOTE: in grafana chart 8.11.1 extraContainers is a raw YAML *string*
+  # (rendered via `tpl`), not a list. Passing a list fails with
+  # "wrong type for value; expected string; got []interface {}".
+  extraContainers: |
+    - name: git-sync-dashboards
+      image: registry.k8s.io/git-sync/git-sync:v4.4.0
+      imagePullPolicy: IfNotPresent
+      args:
+        - --repo=https://github.com/bkielbasa/smarthome-metrics.git
+        - --ref=master
+        - --period=30s
+        - --root=/git
+        - --link=current
+        - --one-time=false
+      volumeMounts:
+        - name: git-dashboards
+          mountPath: /git
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+      securityContext:
+        # No runAsUser override on purpose: the pod runs as 472/472 with
+        # fsGroup 472, and the emptyDir is group-writable only for that gid.
+        # Forcing 65533 (as the upstream smarthome-metrics values do) leaves
+        # git-sync unable to write into the shared volume.
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+
+  # Keyed by filename, so this coexists with the chart's own
+  # sc-dashboardproviders.yaml rather than replacing it.
+  dashboardProviders:
+    git-smarthome.yaml:
+      apiVersion: 1
+      providers:
+        - name: "SmartHome"
+          orgId: 1
+          folder: "SmartHome"
+          type: file
+          disableDeletion: false
+          editable: true
+          allowUiUpdates: true
+          updateIntervalSeconds: 30
+          options:
+            path: /var/lib/grafana/dashboards-git/current/dashboards
+            foldersFromFilesStructure: false
+
   datasources:
     datasources.yaml:
       apiVersion: 1
       datasources:
+        # Backs the SmartHome dashboards auto-loaded from GitHub by the
+        # git-sync sidecar. The UID is fixed because those dashboard JSONs
+        # hardcode it in all 11 panel targets.
+        #
+        # Declared here rather than added through the UI: grafana.persistence
+        # is disabled, so the Grafana SQLite DB lives in an emptyDir and any
+        # UI-created datasource is destroyed on the next pod restart.
+        #
+        # $SMARTHOME_DB_PASSWORD is substituted from the Grafana container
+        # env at provisioning time; the value itself is injected as a
+        # sensitive set_sensitive in terraform/monitoring/monitoring.tf, so
+        # no password is ever committed here.
+        - name: "smarthome-metrics"
+          type: postgres
+          uid: dfzk58ktrrnr4f
+          url: "postgresql.postgresql.svc.cluster.local:5432"
+          user: "homelabmetrics"
+          database: "homelabmetrics"
+          access: proxy
+          isDefault: false
+          editable: false
+          jsonData:
+            sslmode: "disable"
+            postgresVersion: 1500
+            maxOpenConns: 10
+            maxIdleConns: 5
+            connMaxLifetime: 14400
+            timescaledb: false
+          secureJsonData:
+            password: $SMARTHOME_DB_PASSWORD
         - name: "Prometheus"
           type: prometheus
           uid: prometheus

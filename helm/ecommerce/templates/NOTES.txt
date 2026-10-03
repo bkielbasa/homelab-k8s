@@ -1,0 +1,12 @@
+ecommerce deployed.
+
+Storefront:
+  {{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+  {{- end }}
+
+Credentials come from Vault via external-secrets (Secret `{{ include "ecommerce.fullname" . }}-env`):
+  kubectl -n {{ .Release.Namespace }} get secret {{ include "ecommerce.fullname" . }}-env -o jsonpath='{.data.DATABASE_URL}' | base64 -d; echo
+
+Tail logs:
+  kubectl -n {{ .Release.Namespace }} logs -f deploy/{{ include "ecommerce.fullname" . }}

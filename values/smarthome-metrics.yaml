@@ -7,12 +7,12 @@ database:
   port: 5432
   user: "homelabmetrics"
   name: "homelabmetrics"
-  # DATABASE_URL is synced into the smarthome namespace by the
-  # smarthome-metrics-db ExternalSecret (see
-  # terraform/services/smarthome-metrics.tf). A secretKeyRef cannot cross
-  # namespaces, so the credentials are materialised here rather than read
-  # in place from the postgresql namespace — `existingSecret` must be a bare
-  # name, never "namespace/name".
+  # The role password is synced into the smarthome namespace by the
+  # smarthome-metrics-db ExternalSecret from Vault's
+  # secret/smarthome-metrics (see terraform/services/smarthome-metrics.tf).
+  # A secretKeyRef cannot cross namespaces, so the credential is
+  # materialised here rather than read in place from the postgresql
+  # namespace — `existingSecret` must be a bare name, never "namespace/name".
   existingSecret: smarthome-metrics-env
-  urlSecretKey: DATABASE_URL
+  existingSecretPasswordKey: password
 

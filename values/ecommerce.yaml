@@ -1,0 +1,52 @@
+image:
+  repository: bartlomiejklimczak/ecommerce
+  tag: v0.1.0
+  pullPolicy: IfNotPresent
+
+# The app binds 3000 inside the container. Change here (not in the chart) if
+# the image's listen port changes.
+service:
+  port: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-dns
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: demo.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - demo.klimczak.xyz
+      secretName: ecommerce-tls
+
+# Env comes from the `ecommerce-env` Secret, which external-secrets populates
+# from Vault's `secret/data/ecommerce`. Requires, in Vault:
+#   DATABASE_URL="postgres://ecommerce:PASS@postgresql.postgresql.svc.cluster.local:5432/ecommerce?sslmode=disable"
+# (create the role/db with ./psql_create_db.sh ecommerce)
+envSecret:
+  create: false
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 20
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 512Mi

@@ -98,6 +98,22 @@ resource "pihole_dns_record" "freshrss" {
 }
 
 # ---------------------------------------------------------------------------
+# Ecommerce (subdomain: demo)
+# ---------------------------------------------------------------------------
+resource "ovh_domain_zone_record" "ecommerce" {
+  zone      = "klimczak.xyz"
+  subdomain = "demo"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
+
+resource "pihole_dns_record" "ecommerce" {
+  domain = "demo.klimczak.xyz"
+  ip     = "192.168.1.30"
+}
+
+# ---------------------------------------------------------------------------
 # Navidrome (subdomain: audio)
 # ---------------------------------------------------------------------------
 resource "ovh_domain_zone_record" "navidrome" {

@@ -5,6 +5,16 @@ data "vault_kv_secret_v2" "oidc_grafana" {
   name  = "oidc/grafana"
 }
 
+# Password for the smarthome-metrics PostgreSQL database. Same secret the
+# smarthome-metrics workload reads via ExternalSecret in the smarthome
+# namespace (see terraform/services/smarthome-metrics.tf); Grafana needs its
+# own copy because the datasource is provisioned in the monitoring namespace
+# and a secretKeyRef cannot cross namespaces.
+data "vault_kv_secret_v2" "smarthome_db" {
+  mount = "secret"
+  name  = "smarthome-metrics"
+}
+
 resource "ovh_domain_zone_record" "grafana" {
   zone      = "klimczak.xyz"
   subdomain = "grafana"
@@ -33,6 +43,14 @@ resource "helm_release" "prometheus" {
     {
       name  = "grafana.env.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET"
       value = data.vault_kv_secret_v2.oidc_grafana.data["clientSecret"]
+    },
+    # Interpolated into the smarthome-metrics datasource provisioning via
+    # $SMARTHOME_DB_PASSWORD in values/prometheus.yaml. Grafana's SQLite DB
+    # is an emptyDir here, so this has to be declarative — a datasource added
+    # through the UI does not survive a pod restart.
+    {
+      name  = "grafana.env.SMARTHOME_DB_PASSWORD"
+      value = data.vault_kv_secret_v2.smarthome_db.data["password"]
     },
   ]
 }
