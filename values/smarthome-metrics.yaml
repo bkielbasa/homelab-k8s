@@ -1,3 +1,8 @@
+image:
+  repository: bartlomiejklimczak/smarthome-metrics
+  pullPolicy: IfNotPresent
+  tag: "1.0.4"
+  
 service:
   type: NodePort
   nodePort: 30088 # Optional: fixed port (30000-32767), or omit to auto-assign
