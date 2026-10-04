@@ -5,7 +5,14 @@
 # Prerequisites (run once, manually):
 #   ./psql_create_db.sh ecommerce
 #   vault kv put secret/ecommerce \
-#     DATABASE_URL="postgres://ecommerce:PASS@postgresql.postgresql.svc.cluster.local:5432/ecommerce?sslmode=disable"
+#     POSTGRES_HOST="postgresql.postgresql.svc.cluster.local" \
+#     POSTGRES_PORT="5432" \
+#     POSTGRES_USER="ecommerce" \
+#     POSTGRES_PASSWORD="<role password>" \
+#     POSTGRES_DB="ecommerce" \
+#     SESSION_SECRET="$(openssl rand -base64 32)"
+#
+# The app reads discrete lib/pq-style variables (POSTGRES_*), not DATABASE_URL.
 #
 resource "kubernetes_namespace" "ecommerce" {
   metadata {
@@ -83,8 +90,9 @@ resource "kubectl_manifest" "ecommerce_vault_secret_store" {
 
 # Pulls every field of `secret/data/ecommerce` into a K8s Secret named
 # `ecommerce-env`. The chart feeds it to the container via envFrom, so each
-# Vault field becomes an env var of the same name (DATABASE_URL today; a
-# session secret or SMTP password later needs no chart change).
+# Vault field becomes an env var of the same name (POSTGRES_HOST/PORT/USER/
+# PASSWORD/DB + SESSION_SECRET today; a Stripe key or SMTP password later needs
+# no chart change).
 resource "kubectl_manifest" "ecommerce_db_external_secret" {
   yaml_body = yamlencode({
     apiVersion = "external-secrets.io/v1"

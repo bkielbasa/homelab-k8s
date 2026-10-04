@@ -3,10 +3,10 @@ image:
   tag: v0.1.0
   pullPolicy: IfNotPresent
 
-# The app binds 3000 inside the container. Change here (not in the chart) if
+# The app binds 8080 (SERVER_PORT default). Change here (not in the chart) if
 # the image's listen port changes.
 service:
-  port: 3000
+  port: 8080
 
 ingress:
   enabled: true
@@ -25,21 +25,29 @@ ingress:
       secretName: ecommerce-tls
 
 # Env comes from the `ecommerce-env` Secret, which external-secrets populates
-# from Vault's `secret/data/ecommerce`. Requires, in Vault:
-#   DATABASE_URL="postgres://ecommerce:PASS@postgresql.postgresql.svc.cluster.local:5432/ecommerce?sslmode=disable"
-# (create the role/db with ./psql_create_db.sh ecommerce)
+# from Vault's `secret/data/ecommerce`. The app reads discrete lib/pq-style
+# vars (not DATABASE_URL). Requires, in Vault:
+#   POSTGRES_HOST=postgresql.postgresql.svc.cluster.local
+#   POSTGRES_PORT=5432
+#   POSTGRES_USER=ecommerce
+#   POSTGRES_PASSWORD=<role password>
+#   POSTGRES_DB=ecommerce
+#   SESSION_SECRET=<openssl rand -base64 32>   # app refuses the insecure default in prod
+# (role/db already exist; see ./psql_create_db.sh ecommerce)
 envSecret:
   create: false
 
+# /health answers before the DB is reachable, so the pod doesn't crash-loop
+# while migrations or credentials are still being sorted out.
 livenessProbe:
   httpGet:
-    path: /
+    path: /healthyz
     port: http
   initialDelaySeconds: 15
   periodSeconds: 20
 readinessProbe:
   httpGet:
-    path: /
+    path: /readyz
     port: http
   initialDelaySeconds: 5
   periodSeconds: 10

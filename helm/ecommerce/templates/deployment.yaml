@@ -45,9 +45,9 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           # Every field of `secret/data/ecommerce` in Vault becomes an env var
-          # here, so new keys (session secret, mail creds, ...) need no chart
-          # change. Synced by the `ecommerce-env` ExternalSecret — see
-          # terraform/services/ecommerce.tf.
+          # here (POSTGRES_*, SESSION_SECRET), so new keys (Stripe, SMTP, ...)
+          # need no chart change. Synced by the `ecommerce-env` ExternalSecret —
+          # see terraform/services/ecommerce.tf.
           envFrom:
             - secretRef:
                 name: {{ include "ecommerce.fullname" . }}-env
