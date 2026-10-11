@@ -23,7 +23,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.28"
+  tag: "v0.1.29"
 
 ingress:
   enabled: true
@@ -76,6 +76,7 @@ config: |
     tool_timeout: 30s
 
   memory:
+    enabled: true
     pgvector: false
     embedding_model: text-embedding-3-small
 
