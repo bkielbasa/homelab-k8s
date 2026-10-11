@@ -23,7 +23,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.26"
+  tag: "v0.1.27"
 
 ingress:
   enabled: true
