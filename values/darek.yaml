@@ -23,7 +23,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.29"
+  tag: "v0.1.30"
 
 ingress:
   enabled: true
@@ -78,6 +78,21 @@ config: |
   memory:
     enabled: true
     pgvector: false
+    embedding_model: text-embedding-3-small
+
+  # Auto-summarize + tag every ingested link (reusing existing tags).
+  analyze:
+    enabled: true
+    kinds: [article, video]
+    tag_vocab_limit: 200
+
+  # Rating-driven "Reading suggestions" in the daily digest + links.recommend.
+  recommend:
+    enabled: true
+    count: 3
+    min_liked: 3
+    lookback_days: 0
+    cooldown_days: 0
     embedding_model: text-embedding-3-small
 
   server:
