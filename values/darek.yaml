@@ -23,7 +23,7 @@ envSecret:
 image:
   repository: bartlomiejklimczak/darek
   pullPolicy: IfNotPresent
-  tag: "v0.1.30"
+  tag: "v0.1.31"
 
 ingress:
   enabled: true
@@ -126,6 +126,9 @@ config: |
   calendar_digest:
     to: bartek@klimczak.xyz
     from_account: personal
+    # Clickable 1-5 stars on reading suggestions; served by the public
+    # GET /r/{id}/{value} endpoint on the serve pod.
+    rate_base_url: https://darek.klimczak.xyz
 
   auth:
     issuer: https://authentik.klimczak.xyz/application/o/darek/
