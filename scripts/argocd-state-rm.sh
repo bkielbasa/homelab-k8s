@@ -13,7 +13,11 @@ cd "$(dirname "$0")/.."
 
 rm_state() {
   local dir=$1 res=$2
-  if terraform -chdir="$dir" state list 2>/dev/null | grep -Fxq "$res"; then
+  # Capture state list first: `state list | grep -q` + `pipefail` misreports
+  # "absent" when grep exits early and terraform dies of SIGPIPE.
+  local list
+  list=$(terraform -chdir="$dir" state list 2>/dev/null || true)
+  if printf '%s\n' "$list" | grep -Fxq "$res"; then
     terraform -chdir="$dir" state rm "$res"
     echo "removed: $dir -> $res"
   else
