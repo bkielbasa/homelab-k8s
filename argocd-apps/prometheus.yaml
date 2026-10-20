@@ -30,3 +30,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # kube-prometheus-stack CRDs (prometheuses.monitoring.coreos.com etc.)
+      # exceed the 256KiB annotation limit of client-side apply — Argo must
+      # patch server-side without writing a last-applied-configuration.
+      - ServerSideApply=true
