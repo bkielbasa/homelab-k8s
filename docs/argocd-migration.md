@@ -105,6 +105,9 @@ Known intended diffs only:
   `kubectl delete secret headlamp-k8s-oidc -n headlamp`
 - `prometheus`: Grafana env switches from explicit env vars to
   `envFromSecrets` (same values, different wiring) — triggers one rollout.
+  The app also needs `ServerSideApply=true` — kube-prometheus-stack's CRDs
+  (`prometheuses.monitoring.coreos.com` etc.) are too large for Argo's
+  client-side apply (256KiB `last-applied-configuration` annotation limit).
 
 ## After the migration
 
