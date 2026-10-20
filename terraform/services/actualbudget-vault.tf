@@ -89,6 +89,18 @@ resource "kubectl_manifest" "actualbudget_oidc_external_secret" {
       target = {
         name           = "actualbudget-oidc"
         creationPolicy = "Owner"
+        template = {
+          # clientId is public but lives here so the chart has a single source
+          # for both OIDC credentials (spec.data only accepts remoteRef
+          # entries in external-secrets.io/v1, so statics go in the template).
+          data = {
+            clientId = "actualbudget"
+            # Fetched values only enter the rendered secret via the template
+            # context — plain spec.data keys are NOT merged when target.template
+            # is set.
+            clientSecret = "{{ .clientSecret }}"
+          }
+        }
       }
       data = [
         {
@@ -98,7 +110,6 @@ resource "kubectl_manifest" "actualbudget_oidc_external_secret" {
             property = "clientSecret"
           }
         },
-        { secretKey = "clientId", value = "actualbudget" },
       ]
     }
   })

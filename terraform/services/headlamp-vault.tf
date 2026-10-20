@@ -90,6 +90,23 @@ resource "kubectl_manifest" "headlamp_oidc_external_secret" {
       target = {
         name           = "headlamp-oidc"
         creationPolicy = "Owner"
+        template = {
+          # Static, non-secret OIDC config (same values the chart used to
+          # template into its own secret). spec.data only accepts remoteRef
+          # entries in external-secrets.io/v1, so statics go in the template.
+          data = {
+            OIDC_CLIENT_ID            = "kubernetes"
+            OIDC_ISSUER_URL           = "https://authentik.klimczak.xyz/application/o/kubernetes/"
+            OIDC_SCOPES               = "openid profile email groups offline_access"
+            OIDC_CALLBACK_URL         = "https://headlamp.klimczak.xyz/oidc-callback"
+            OIDC_VALIDATOR_CLIENT_ID  = "kubernetes"
+            OIDC_VALIDATOR_ISSUER_URL = "https://authentik.klimczak.xyz/application/o/kubernetes/"
+            # Fetched values only enter the rendered secret via the template
+            # context — plain spec.data keys are NOT merged when target.template
+            # is set.
+            OIDC_CLIENT_SECRET = "{{ .OIDC_CLIENT_SECRET }}"
+          }
+        }
       }
       data = [
         {
@@ -99,14 +116,6 @@ resource "kubectl_manifest" "headlamp_oidc_external_secret" {
             property = "clientSecret"
           }
         },
-        # Static, non-secret OIDC config (same values the chart used to
-        # template into its own secret).
-        { secretKey = "OIDC_CLIENT_ID", value = "kubernetes" },
-        { secretKey = "OIDC_ISSUER_URL", value = "https://authentik.klimczak.xyz/application/o/kubernetes/" },
-        { secretKey = "OIDC_SCOPES", value = "openid profile email groups offline_access" },
-        { secretKey = "OIDC_CALLBACK_URL", value = "https://headlamp.klimczak.xyz/oidc-callback" },
-        { secretKey = "OIDC_VALIDATOR_CLIENT_ID", value = "kubernetes" },
-        { secretKey = "OIDC_VALIDATOR_ISSUER_URL", value = "https://authentik.klimczak.xyz/application/o/kubernetes/" },
       ]
     }
   })
