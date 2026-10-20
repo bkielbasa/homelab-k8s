@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "infra-guy.fullname" . }}
+  labels:
+    {{- include "infra-guy.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+  selector:
+    {{- include "infra-guy.selectorLabels" . | nindent 4 }}

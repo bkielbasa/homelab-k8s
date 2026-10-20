@@ -128,3 +128,19 @@ resource "pihole_dns_record" "navidrome" {
   domain = "audio.klimczak.xyz"
   ip     = "192.168.1.30"
 }
+
+# ---------------------------------------------------------------------------
+# infra-guy (subdomain: infra)
+# ---------------------------------------------------------------------------
+resource "ovh_domain_zone_record" "infra_guy" {
+  zone      = "klimczak.xyz"
+  subdomain = "infra"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
+
+resource "pihole_dns_record" "infra_guy" {
+  domain = "infra.klimczak.xyz"
+  ip     = "192.168.1.30"
+}

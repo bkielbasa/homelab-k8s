@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "infra-guy.fullname" . }}
+  labels:
+    {{- include "infra-guy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "infra-guy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "infra-guy.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "infra-guy.serviceAccountName" . }}
+      initContainers:
+        - name: wait-db
+          image: {{ .Values.postgres.image }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until pg_isready -h {{ include "infra-guy.fullname" . }}-db -U {{ .Values.postgres.user }}; do sleep 2; done
+      containers:
+        - name: server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: {{ .Values.envSecret }}
+          env:
+            - name: DATABASE_URL
+              value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ include "infra-guy.fullname" . }}-db:5432/{{ .Values.postgres.database }}?sslmode=disable"
+            - name: PUBLIC_BASE_URL
+              value: {{ .Values.publicBaseURL | quote }}
+            - name: HTTP_ADDR
+              value: ":8080"
+            - name: WORK_DIR
+              value: /data
+          volumeMounts:
+            - name: work
+              mountPath: /data
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: work
+          persistentVolumeClaim:
+            claimName: {{ include "infra-guy.fullname" . }}-work

@@ -1,0 +1,45 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/bkielbasa/infra-guy
+  pullPolicy: IfNotPresent
+  tag: "v0.1.0"
+
+publicBaseURL: https://infra.klimczak.xyz
+
+envSecret: infra-guy-env
+
+serviceAccount:
+  create: false
+  name: infra-guy-sa
+
+podAnnotations:
+  linkerd.io/inject: disabled
+
+postgres:
+  image: postgres:16
+  user: infraguy
+  database: infraguy
+  storage: 5Gi
+
+persistence:
+  storageClass: qnap-nfs
+  accessMode: ReadWriteOnce
+  workSize: 10Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+  hosts:
+    - host: infra.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - infra.klimczak.xyz
+      secretName: infra-tls
