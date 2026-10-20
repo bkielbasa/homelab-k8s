@@ -5,16 +5,19 @@ description: Use when adding a new service or app to this homelab k8s cluster �
 
 # Add a service to the homelab cluster
 
-Every internet-reachable, SSO-gated service follows the same set of Terraform files.
+Every internet-reachable, SSO-gated service follows the same pattern:
+Terraform creates the namespace/DNS/OIDC/Vault glue, Argo CD deploys the
+workload from `argocd-apps/`.
 `<svc>` = resource/file slug (e.g. `argocd`), `<host>` = subdomain (e.g. `argo`).
-Use an existing service as a copy template: **argocd** (upstream chart) or **darek**
-(local chart + Vault secrets).
+Use an existing service as a copy template: **mariadb** (upstream chart) or
+**darek** (local chart + Vault secrets).
 
 ## Files to create (per service)
 
 | File | Purpose |
 |------|---------|
-| `<svc>.tf` | namespace + `helm_release` (+ `set_sensitive`, `depends_on`) |
+| `<svc>.tf` | namespace only — **no `helm_release`**: the workload is deployed by Argo CD |
+| `argocd-apps/<svc>.yaml` | Argo CD Application (auto-applied by the `homelab-apps` root app on push) |
 | `values/<svc>.yaml` | chart values: ingress, TLS, OIDC, app config |
 | `<svc>-oidc.tf` | Authentik group + provider + application (+ policy gate) |
 | `<svc>-vault.tf` | SA + Vault policy/role + External Secrets (only if it has secrets) |
@@ -28,12 +31,16 @@ Use an existing service as a copy template: **argocd** (upstream chart) or **dar
    record (`var.public_ip`) only serves the public internet. Missing the Pi-hole record =
    "host doesn't resolve" on the LAN even when the cluster is perfectly healthy. Grep to
    confirm parity: every `ovh_domain_zone_record` needs a matching `pihole_dns_record`.
-2. **`-target` only applies a resource's dependency closure.** `terraform apply
-   -target=helm_release.<svc>` will NOT create the DNS records or Authentik application
-   unless `helm_release.<svc>` `depends_on` them. Either add that `depends_on` (see
-   `argocd.tf`) or run a full `terraform apply`.
-3. **Helm releases that consume secrets must `depends_on` the ExternalSecret/SecretStore**
-   so the k8s Secret exists before the Deployment rolls.
+2. **Never let a `helm_release` and an Argo Application manage the same
+   workload** — they will fight (selfHeal vs helm upgrade). The only remaining
+   `helm_release`s are the bootstrap infra in `terraform/infrastructure`,
+   `terraform/vault`, and `terraform/auth`. Also: `terraform apply -target=...`
+   does NOT deploy the workload — Argo deploys from git after you push
+   `argocd-apps/<svc>.yaml` to `master`.
+3. **The ExternalSecret/SecretStore must exist before Argo first syncs the
+   app**, or the pod starts without its Secret. Create the `<svc>-vault.tf`
+   glue and push the Application in the same change (see `headlamp-vault.tf`
+   for a chart that reads an existing Secret via `envFrom`/`existingSecret`).
 
 ## Shared resources (already exist — reference, don't recreate)
 
@@ -65,8 +72,10 @@ data.authentik_property_mapping_provider_scope.scopes.ids,
 [authentik_property_mapping_provider_scope.groups.id])` to emit the `groups` claim;
 `authentik_application` slug `<svc>` → issuer `https://authentik.klimczak.xyz/application/o/<svc>/`;
 add `authentik_policy_binding` + an `authentik_group` to restrict who can log in.
-Inject the secret into the chart via `set_sensitive` in `<svc>.tf` (see `monitoring.tf` /
-`argocd.tf`). Groups are managed manually in the Authentik UI.
+The OIDC **client secret goes to Vault** (`vault_kv_secret_v2` in
+`terraform/auth/oidc-secrets.tf`), never into chart values — the app root
+reads it back through the ExternalSecret glue (`<svc>-vault.tf`). Groups are
+managed manually in the Authentik UI.
 
 ## 3. Vault + External Secrets (`<svc>-vault.tf`, if the app needs secrets)
 
@@ -77,40 +86,32 @@ Store secrets in Vault under `secret/<app>/<name>` first. Then copy `darek.tf`:
 keys; a templated `kubernetes.io/dockerconfigjson` for private ghcr.io pulls). The chart's
 ServiceAccount must match the bound SA name.
 
-## 4. Helm release (`<svc>.tf`)
+## 4. Namespace (`<svc>.tf`)
 
 ```hcl
-resource "kubernetes_namespace" "<svc>" { metadata { name = "<svc>" } }
-
-resource "helm_release" "<svc>" {
-  name      = "<svc>"
-  namespace = kubernetes_namespace.<svc>.metadata[0].name
-  # upstream: repository + chart + version ; local: chart = "./helm/<svc>"
-  repository = "https://..."; chart = "..."; version = "x.y.z"
-  values = [file("values/<svc>.yaml")]
-
-  set_sensitive = [{ name = "<oidc.secret.path>", value = authentik_provider_oauth2.<svc>.client_secret }]
-
-  depends_on = [  # so -target pulls everything; drop entries that don't apply
-    authentik_application.<svc>,
-    ovh_domain_zone_record.<svc>,
-    pihole_dns_record.<svc>,
-    kubectl_manifest.<svc>_external_secret,
-  ]
+resource "kubernetes_namespace" "<svc>" {
+  metadata {
+    name = "<svc>"
+    # add: annotations = { "linkerd.io/inject" = "enabled" } if the app should be meshed
+  }
 }
 ```
+
+There is **no `helm_release` block** — the chart is deployed by Argo CD.
 
 `values/<svc>.yaml` ingress block: `ingressClassName: nginx`, annotations
 `cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"` +
 `nginx.ingress.kubernetes.io/ssl-redirect: "true"`, host `<host>.klimczak.xyz`, TLS enabled.
 
-## 5. Argo CD Application (GitOps deploy)
+## 5. Argo CD Application (`argocd-apps/<svc>.yaml`)
 
-Once a chart lives in this repo (`helm/<svc>`), register it with Argo instead of (or in
-addition to) the Terraform helm_release — but don't let both manage the same workload.
+The workload's single source of truth. Files in `argocd-apps/` are applied
+automatically by the `homelab-apps` root app (an app-of-apps tracking that
+directory) — **pushing to `master` deploys**; no `kubectl apply`, no Terraform
+step. `terraform apply` only creates the namespace/DNS/OIDC/Vault glue.
 
-Use multi-source with `$values` ref so the root-level `values/<svc>.yaml` can be
-referenced from outside the chart directory:
+Local chart (`helm/<svc>`) — use multi-source with a `$values` ref so the
+root-level values file can be referenced from outside the chart directory:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -138,6 +139,28 @@ spec:
       prune: true
       selfHeal: true
 ```
+
+Upstream chart — first source is the chart repo instead of a path (pin
+`targetRevision` to the chart version; app name must equal the old release
+name if adopting an existing install):
+
+```yaml
+  sources:
+    - repoURL: https://charts.bitnami.com/bitnami   # helm repo index URL
+      chart: <chart>
+      targetRevision: <pinned-chart-version>
+      helm:
+        valueFiles:
+          - $values/values/<svc>.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+```
+
+Add `syncOptions: [CreateNamespace=true]` only when the namespace is NOT
+created by Terraform (e.g. `monitoring`). Secrets never go in values files —
+see `<svc>-vault.tf` (headlamp: `envFrom`, actualbudget: `existingSecret`,
+grafana: `envFromSecrets`).
 
 ## Verify (after apply)
 

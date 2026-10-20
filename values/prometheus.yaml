@@ -1,5 +1,11 @@
 grafana:
   enabled: true
+  # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET and SMARTHOME_DB_PASSWORD are synced
+  # from Vault into the `grafana-env` Secret by ExternalSecret — see
+  # terraform/monitoring/grafana-vault.tf. (They were previously injected via
+  # helm_release.set_sensitive, which Argo cannot do.)
+  envFromSecrets:
+    - name: grafana-env
   ingress:
     enabled: true
     ingressClassName: "nginx"

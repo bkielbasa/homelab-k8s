@@ -4,9 +4,10 @@ persistence:
     - ReadWriteOnce
   size: 5Gi
 
-# SSO via Authentik. clientSecret is injected at apply time via
-# helm_release.set_sensitive in actualbudget.tf (sourced from
-# authentik_provider_oauth2.actualbudget.client_secret).
+# SSO via Authentik. clientId/clientSecret are read from the
+# `actualbudget-oidc` Secret, synced from Vault by ExternalSecret — see
+# terraform/services/actualbudget-vault.tf (the secret was previously
+# injected via helm_release.set_sensitive, which Argo cannot do).
 # enforce=false keeps password login as a fallback in case OIDC breaks.
 login:
   method: openid
@@ -18,6 +19,10 @@ login:
     providerName: "Authentik"
     discoveryUrl: "https://authentik.klimczak.xyz/application/o/actualbudget/.well-known/openid-configuration"
     clientId: "actualbudget"
+    existingSecret:
+      name: actualbudget-oidc
+      clientIdKey: clientId
+      clientSecretKey: clientSecret
 
 ingress:
   enabled: true

@@ -54,3 +54,46 @@ resource "pihole_dns_record" "argocd" {
   domain = "argo.klimczak.xyz"
   ip     = "192.168.1.30"
 }
+
+# App-of-apps: every Application manifest in argocd-apps/*.yaml is applied to
+# the cluster from git (and pruned when its file is removed). This replaces
+# the manual `kubectl apply argocd-apps/` step — see docs/improvements.md #7.
+#
+# NOTE: ApplicationSet's git *directory* generator only produces path
+# parameters from a single static spec.template, so it cannot drive a
+# directory of full Application manifests with per-app sources — the
+# app-of-apps Application is the right primitive for that.
+resource "kubectl_manifest" "homelab_apps" {
+  yaml_body = yamlencode({
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "homelab-apps"
+      namespace = "argocd"
+    }
+    spec = {
+      project = "default"
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "argocd"
+      }
+      sources = [
+        {
+          repoURL        = "https://github.com/bkielbasa/homelab-k8s"
+          targetRevision = "master"
+          path           = "argocd-apps"
+        }
+      ]
+      syncPolicy = {
+        automated = {
+          prune    = true
+          selfHeal = true
+        }
+      }
+    }
+  })
+
+  depends_on = [
+    helm_release.argocd,
+  ]
+}

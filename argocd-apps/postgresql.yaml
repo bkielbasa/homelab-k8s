@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgresql
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: postgresql
+  # Local chart with its own values (no root-level values/ file).
+  sources:
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      path: helm/postgresql
+  # Prune-safe: the DB PVC and the postgresql-credentials Secret are created
+  # outside Terraform/Argo, so Argo never tracks them and never prunes them.
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

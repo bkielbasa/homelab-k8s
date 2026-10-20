@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  # Upstream chart + root-level values/ via $values. Version pinned to the
+  # release currently running. (The old helm_release ordering — alloy after
+  # loki/tempo — is unnecessary: Alloy just retries until the backends are up.)
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: 0.9.2
+      helm:
+        valueFiles:
+          - $values/values/alloy.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

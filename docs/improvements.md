@@ -85,13 +85,16 @@ scripts/
 
 ---
 
-## 7. ArgoCD Apps Are Orphaned
+## 7. ArgoCD Apps Are Orphaned — RESOLVED
 
-The `argocd-apps/*.yaml` manifests aren't managed by Terraform or any automated process. Someone has to `kubectl apply` them manually.
+**Resolved:** an `app-of-apps` root Application named `homelab-apps` (created
+by `kubectl_manifest.homelab_apps` in `terraform/infrastructure/argocd.tf`)
+tracks the `argocd-apps/` directory, so every Application file pushed to
+`master` is applied automatically and removing a file prunes the Application.
 
-Options:
-- Add `kubectl_manifest` resources in Terraform to apply them
-- Use ArgoCD ApplicationSet to self-manage from a directory
+Note: ApplicationSet was considered but its git *directory* generator only
+produces path parameters from a single static `spec.template` — it cannot
+drive a directory of full Application manifests with per-app chart sources.
 
 ---
 

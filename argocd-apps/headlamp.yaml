@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: headlamp
+  # Upstream chart + root-level values/ via $values (the values file lives
+  # outside any chart dir). Version pinned to the release currently running.
+  # NOTE: the OIDC clientSecret is no longer a chart value — it is synced from
+  # Vault into the headlamp-oidc Secret by ExternalSecret (headlamp-vault.tf,
+  # Terraform-managed, never pruned by Argo).
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/headlamp/
+      chart: headlamp
+      targetRevision: 0.41.0
+      helm:
+        valueFiles:
+          - $values/values/headlamp.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  # NOTE: with selfHeal on, image bumps must go through git (commit
+  # values/headlamp.yaml) — out-of-band kubectl/helm changes get reverted.
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

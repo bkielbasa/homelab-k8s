@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vaultwarden
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vaultwarden
+  # Upstream chart + root-level values/ via $values (the values file lives
+  # outside any chart dir). Version pinned to the release currently running.
+  # DB credentials come from the pre-existing prod-db-connstring Secret,
+  # which is not Argo-managed and therefore never pruned.
+  sources:
+    - repoURL: https://guerzon.github.io/vaultwarden
+      chart: vaultwarden
+      targetRevision: 0.46.0
+      helm:
+        valueFiles:
+          - $values/values/vaultwarden-values.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

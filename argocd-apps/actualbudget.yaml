@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: actualbudget
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: actualbudget
+  # Two values files, same split as the old helm_release: the image tag in
+  # values/actualbudget-image.yaml is auto-bumped by an external bot, while
+  # ingress/OIDC config lives in values/actualbudget.yaml so the bot cannot
+  # clobber it. A bot push to master now auto-deploys (Argo polls git).
+  # The OIDC clientSecret is synced from Vault into the actualbudget-oidc
+  # Secret by ExternalSecret (actualbudget-vault.tf, Terraform-managed).
+  sources:
+    - repoURL: https://community-charts.github.io/helm-charts
+      chart: actualbudget
+      targetRevision: 1.9.4
+      helm:
+        valueFiles:
+          - $values/values/actualbudget.yaml
+          - $values/values/actualbudget-image.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

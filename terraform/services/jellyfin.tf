@@ -1,17 +1,9 @@
+# The jellyfin workload (Helm chart) is managed by Argo CD — see
+# argocd-apps/jellyfin.yaml. Only the namespace stays in Terraform. The
+# config/media PVCs (root-level jellyfin-*-pvc/pv.yaml) are managed outside
+# Terraform entirely.
 resource "kubernetes_namespace" "jellyfin" {
   metadata {
     name = "jellyfin"
   }
-}
-
-resource "helm_release" "jellyfin" {
-  name       = "jellyfin"
-  namespace  = kubernetes_namespace.jellyfin.metadata[0].name
-  repository = "https://jellyfin.github.io/jellyfin-helm"
-  chart      = "jellyfin"
-  version    = "3.2.0"
-
-  values = [
-    file("${path.module}/../../values/jellyfin.yaml")
-  ]
 }

@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  # kube-prometheus-stack + root-level values/ via $values. Version pinned to
+  # the release currently running.
+  # NOTE: Grafana's OIDC client secret and the smarthome-metrics DB password
+  # are no longer helm set_sensitive values — they are synced from Vault into
+  # the grafana-env Secret by ExternalSecret (grafana-vault.tf, Terraform-
+  # managed) and pulled in via grafana.envFromSecrets in values/prometheus.yaml.
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 70.4.1
+      helm:
+        valueFiles:
+          - $values/values/prometheus.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

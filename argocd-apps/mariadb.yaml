@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mariadb
+  # Upstream chart + root-level values/ via $values (the values file lives
+  # outside any chart dir). Version pinned to the release currently running.
+  sources:
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: mariadb
+      targetRevision: 26.2.0
+      helm:
+        valueFiles:
+          - $values/values/mariadb.yaml
+    - repoURL: https://github.com/bkielbasa/homelab-k8s
+      targetRevision: master
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

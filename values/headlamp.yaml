@@ -8,10 +8,18 @@ config:
   # ClusterRoleBinding mapping oidc:kubernetes-admins -> cluster-admin.
   oidc:
     secret:
-      create: true
+      # The OIDC config (incl. clientSecret) is synced from Vault into the
+      # `headlamp-oidc` Secret by ExternalSecret — see
+      # terraform/services/headlamp-vault.tf. The chart must not render its
+      # own copy: clientSecret is no longer a chart value.
+      create: false
       name: headlamp-k8s-oidc
+    externalSecret:
+      # Chart reads OIDC_* env vars from an existing Secret via envFrom.
+      enabled: true
+      name: headlamp-oidc
     clientID: "kubernetes"
-    # clientSecret injected via helm_release set_sensitive
+    # clientSecret comes from the headlamp-oidc Secret (Vault/ESO)
     issuerURL: "https://authentik.klimczak.xyz/application/o/kubernetes/"
     scopes: "openid profile email groups offline_access"
     callbackURL: "https://headlamp.klimczak.xyz/oidc-callback"
