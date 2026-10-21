@@ -70,7 +70,7 @@ resource "kubectl_manifest" "infra_guy_vault_secret_store" {
   ]
 }
 
-# Fields: POSTGRES_PASSWORD, BASIC_AUTH_USER, BASIC_AUTH_PASSWORD.
+# Fields: POSTGRES_PASSWORD, GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_APP_WEBHOOK_SECRET, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET.
 resource "kubectl_manifest" "infra_guy_env_external_secret" {
   yaml_body = yamlencode({
     apiVersion = "external-secrets.io/v1"

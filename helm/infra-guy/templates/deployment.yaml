@@ -42,6 +42,8 @@ spec:
               value: "postgres://{{ .Values.postgres.user }}:$(POSTGRES_PASSWORD)@{{ include "infra-guy.fullname" . }}-db:5432/{{ .Values.postgres.database }}?sslmode=disable"
             - name: PUBLIC_BASE_URL
               value: {{ .Values.publicBaseURL | quote }}
+            - name: GITHUB_APP_PRIVATE_KEY_FILE
+              value: /run/secrets/infra-guy/GITHUB_APP_PRIVATE_KEY
             - name: HTTP_ADDR
               value: ":8080"
             - name: WORK_DIR
@@ -49,6 +51,9 @@ spec:
           volumeMounts:
             - name: work
               mountPath: /data
+            - name: env-secret
+              mountPath: /run/secrets/infra-guy
+              readOnly: true
           readinessProbe:
             tcpSocket:
               port: http
@@ -65,3 +70,6 @@ spec:
         - name: work
           persistentVolumeClaim:
             claimName: {{ include "infra-guy.fullname" . }}-work
+        - name: env-secret
+          secret:
+            secretName: {{ .Values.envSecret }}
