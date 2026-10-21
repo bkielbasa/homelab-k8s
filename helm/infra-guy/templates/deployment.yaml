@@ -48,6 +48,20 @@ spec:
               value: ":8080"
             - name: WORK_DIR
               value: /data
+            - name: WORKER_MODE
+              value: {{ (.Values.worker).mode | default "k8s" | quote }}
+            - name: WORKER_IMAGE
+              value: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            - name: WORKER_IMAGE_PULL_POLICY
+              value: {{ .Values.image.pullPolicy | quote }}
+            - name: WORKER_K8S_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: WORKER_SERVICE_ACCOUNT
+              value: {{ include "infra-guy.serviceAccountName" . | quote }}
+            - name: WORKER_ENV_SECRET
+              value: {{ .Values.envSecret | quote }}
+            - name: INTERNAL_BASE_URL
+              value: "http://{{ include "infra-guy.fullname" . }}:{{ .Values.service.port }}"
           volumeMounts:
             - name: work
               mountPath: /data
