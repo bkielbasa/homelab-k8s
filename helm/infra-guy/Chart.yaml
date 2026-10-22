@@ -3,4 +3,4 @@ name: infra-guy
 description: Terraform control plane (Go, HTMX) with its own Postgres.
 type: application
 version: 0.1.4
-appVersion: "v0.1.13"
+appVersion: "v0.1.14"
