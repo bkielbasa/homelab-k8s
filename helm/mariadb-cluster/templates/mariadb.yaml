@@ -50,7 +50,7 @@ spec:
     name: {{ .Values.mariadb.name }}
   schedule:
     cron: {{ .Values.backup.schedule | quote }}
-  maxRetention: {{ .Values.backup.maxRetention }}d
+  maxRetention: "720h"
   compression: {{ .Values.backup.compression }}
   storage:
     s3:
