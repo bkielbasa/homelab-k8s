@@ -10,7 +10,6 @@ spec:
     {{- if .Values.backup.endpointURL }}
     endpointURL: {{ .Values.backup.endpointURL }}
     {{- end }}
-    {{- if .Values.backup.region }}
     s3Credentials:
       accessKeyId:
         name: {{ .Values.backup.credentialsSecretName }}
@@ -20,17 +19,6 @@ spec:
         name: {{ .Values.backup.credentialsSecretName }}
         key: SECRET_ACCESS_KEY
         namespace: {{ .Values.backup.credentialsSecretNamespace }}
-    {{- else }}
-    s3Credentials:
-      accessKeyId:
-        name: {{ .Values.backup.credentialsSecretName }}
-        key: ACCESS_KEY_ID
-        namespace: {{ .Values.backup.credentialsSecretNamespace }}
-      secretAccessKey:
-        name: {{ .Values.backup.credentialsSecretName }}
-        key: SECRET_ACCESS_KEY
-        namespace: {{ .Values.backup.credentialsSecretNamespace }}
-    {{- end }}
     wal:
       compression: gzip
     data:
@@ -46,13 +34,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: {{ .Values.cluster.instances }}
-
   imageName: {{ .Values.cluster.imageName }}
-
   storage:
     size: {{ .Values.cluster.storage.size }}
     storageClass: {{ .Values.cluster.storage.storageClass }}
-
   {{- if .Values.backup.enabled }}
   plugins:
     - name: barman-cloud.cloudnative-pg.io
@@ -60,19 +45,16 @@ spec:
       parameters:
         barmanObjectName: {{ .Values.cluster.name }}-store
   {{- end }}
-
   postgresql:
     parameters:
       max_connections: "200"
       shared_buffers: "256MB"
-
   monitoring:
     enablePodMonitor: false
   bootstrap:
     initdb:
       database: app
       owner: app
-{{- end }}
 
 {{- if and .Values.backup.enabled .Values.scheduledBackup.enabled }}
 ---
