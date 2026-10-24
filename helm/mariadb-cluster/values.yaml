@@ -1,0 +1,29 @@
+mariadb:
+  name: mariadb
+  replicas: 1
+  storage:
+    size: 8Gi
+    storageClass: qnap-nfs
+  rootPasswordSecretKeyRef:
+    name: mariadb-root
+    key: password
+    generate: true
+  database: app
+  username: app
+  passwordSecretKeyRef:
+    name: mariadb-app
+    key: password
+    generate: true
+
+backup:
+  enabled: true
+  schedule: "0 3 * * *"  # codziennie 03:00
+  bucket: "homelab-db-backups"  # zmień na swój bucket
+  region: "eu-central-1"
+  endpointURL: ""
+  prefix: mariadb
+  # Credentials from secret in namespace mariadb-backup
+  s3CredentialsSecretName: aws-creds
+  s3CredentialsSecretNamespace: mariadb-backup
+  maxRetention: 30
+  compression: gzip

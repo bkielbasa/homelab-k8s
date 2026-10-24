@@ -1,0 +1,25 @@
+cluster:
+  name: cluster
+  instances: 1
+  storage:
+    size: 20Gi
+    storageClass: qnap-nfs
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.6
+
+backup:
+  enabled: true
+  # S3 bucket for backups
+  bucket: "homelab-db-backups"  # zmień na swój bucket
+  # Region/endpoint - dla AWS używaj region, dla innych (minio/ovh) ustaw endpoint
+  region: "eu-central-1"
+  endpointURL: ""  # np. https://s3.eu-central-1.wasabisys.com lub pusta dla AWS
+  path: ""
+  # Secret with credentials (ACCESS_KEY_ID, SECRET_ACCESS_KEY) in namespace cnpg-backup
+  credentialsSecretName: aws-creds
+  credentialsSecretNamespace: cnpg-backup
+
+scheduledBackup:
+  enabled: true
+  schedule: "0 2 * * *"  # codziennie 02:00
+  backupOwnerReference: self
+  immediate: false

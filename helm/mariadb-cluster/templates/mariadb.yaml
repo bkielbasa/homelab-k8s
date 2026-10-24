@@ -1,0 +1,85 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: {{ .Values.mariadb.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.mariadb.replicas }}
+  
+  rootPasswordSecretKeyRef:
+    name: {{ .Values.mariadb.rootPasswordSecretKeyRef.name }}
+    key: {{ .Values.mariadb.rootPasswordSecretKeyRef.key }}
+    {{- if .Values.mariadb.rootPasswordSecretKeyRef.generate }}
+    generate: true
+    {{- end }}
+  
+  database: {{ .Values.mariadb.database }}
+  username: {{ .Values.mariadb.username }}
+  passwordSecretKeyRef:
+    name: {{ .Values.mariadb.passwordSecretKeyRef.name }}
+    key: {{ .Values.mariadb.passwordSecretKeyRef.key }}
+    {{- if .Values.mariadb.passwordSecretKeyRef.generate }}
+    generate: true
+    {{- end }}
+  
+  storage:
+    size: {{ .Values.mariadb.storage.size }}
+    storageClassName: {{ .Values.mariadb.storage.storageClass }}
+  
+  {{- if .Values.backup.enabled }}
+  galera:
+    enabled: false
+  backup:
+    enabled: true
+  {{- end }}
+  
+  metrics:
+    enabled: false
+  
+  myCnf: |
+    [mariadb]
+    bind-address=0.0.0.0
+    max_connections=200
+    innodb_buffer_pool_size=256M
+{{- if .Values.backup.enabled }}
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Backup
+metadata:
+  name: {{ .Values.mariadb.name }}-backup
+  namespace: {{ .Release.Namespace }}
+spec:
+  mariaDbRef:
+    name: {{ .Values.mariadb.name }}
+  schedule: {{ .Values.backup.schedule | quote }}
+  maxRetention: {{ .Values.backup.maxRetention }}
+  compression: {{ .Values.backup.compression }}
+  {{- if .Values.backup.endpointURL }}
+  s3:
+    bucket: {{ .Values.backup.bucket }}
+    prefix: {{ .Values.backup.prefix }}
+    endpoint: {{ .Values.backup.endpointURL }}
+    region: {{ .Values.backup.region }}
+    accessKeyIdSecretKeyRef:
+      name: {{ .Values.backup.s3CredentialsSecretName }}
+      key: ACCESS_KEY_ID
+      namespace: {{ .Values.backup.s3CredentialsSecretNamespace }}
+    secretAccessKeySecretKeyRef:
+      name: {{ .Values.backup.s3CredentialsSecretName }}
+      key: SECRET_ACCESS_KEY
+      namespace: {{ .Values.backup.s3CredentialsSecretNamespace }}
+  {{- else }}
+  s3:
+    bucket: {{ .Values.backup.bucket }}
+    prefix: {{ .Values.backup.prefix }}
+    region: {{ .Values.backup.region }}
+    accessKeyIdSecretKeyRef:
+      name: {{ .Values.backup.s3CredentialsSecretName }}
+      key: ACCESS_KEY_ID
+      namespace: {{ .Values.backup.s3CredentialsSecretNamespace }}
+    secretAccessKeySecretKeyRef:
+      name: {{ .Values.backup.s3CredentialsSecretName }}
+      key: SECRET_ACCESS_KEY
+      namespace: {{ .Values.backup.s3CredentialsSecretNamespace }}
+  {{- end }}
+{{- end }}
