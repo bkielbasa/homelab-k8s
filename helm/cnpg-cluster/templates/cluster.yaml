@@ -14,11 +14,9 @@ spec:
       accessKeyId:
         name: {{ .Values.backup.credentialsSecretName }}
         key: ACCESS_KEY_ID
-        namespace: {{ .Values.backup.credentialsSecretNamespace }}
       secretAccessKey:
         name: {{ .Values.backup.credentialsSecretName }}
         key: SECRET_ACCESS_KEY
-        namespace: {{ .Values.backup.credentialsSecretNamespace }}
     wal:
       compression: gzip
     data:
