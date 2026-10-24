@@ -9,7 +9,7 @@ cluster:
 backup:
   enabled: true
   # S3 bucket for backups
-  bucket: "homelab-db-backups"  # zmień na swój bucket
+  bucket: "homelab-bklimczak-backup"  # zmień na swój bucket
   # Region/endpoint - dla AWS używaj region, dla innych (minio/ovh) ustaw endpoint
   region: "eu-central-1"
   endpointURL: ""  # np. https://s3.eu-central-1.wasabisys.com lub pusta dla AWS
