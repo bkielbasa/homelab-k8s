@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/bkielbasa/infra-guy
   pullPolicy: IfNotPresent
-  tag: "v0.1.29"
+  tag: "v0.1.30"
 
 publicBaseURL: https://infra.klimczak.xyz
 
