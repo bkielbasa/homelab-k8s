@@ -20,7 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "infra-guy.labels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ include "infra-guy.name" . }}-migrate
+        app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: migrate
     spec:
       serviceAccountName: {{ include "infra-guy.serviceAccountName" . }}
