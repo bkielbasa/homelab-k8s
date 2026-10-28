@@ -13,6 +13,26 @@ resource "kubernetes_service_account" "infra_guy" {
   }
 }
 
+# infra-guy runs Terraform in-cluster; grant it cluster-admin so the
+# external runner can manage cluster resources.
+resource "kubernetes_cluster_role_binding" "infra_guy_cluster_admin" {
+  metadata {
+    name = "infra-guy-cluster-admin"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "infra-guy-sa"
+    namespace = kubernetes_namespace.infra_guy.metadata[0].name
+  }
+}
+
 resource "vault_policy" "infra_guy" {
   name = "infra-guy"
 

@@ -1,21 +1,21 @@
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+# No config_path: when run in-cluster (infra-guy worker) the provider uses the
+# pod service account; locally it falls back to KUBECONFIG.
+provider "kubernetes" {}
 
-provider "kubectl" {
-  config_path = "~/.kube/config"
-}
+provider "kubectl" {}
 
 provider "helm" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
+  kubernetes = {}
 }
 
 provider "vault" {
   address = "https://vault.klimczak.xyz"
   token   = var.vault_token
 }
+
+# infra-guy should inject these via project variables / secrets:
+#   TF_VAR_vault_token, TF_VAR_ovh_app_key, TF_VAR_ovh_app_secret,
+#   TF_VAR_ovh_consumer_key, TF_VAR_pihole_password
 
 provider "ovh" {
   endpoint           = "ovh-eu"
