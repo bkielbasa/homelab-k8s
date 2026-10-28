@@ -9,7 +9,7 @@ provider "helm" {
 }
 
 provider "vault" {
-  address = "https://vault.klimczak.xyz"
+  address = var.vault_addr
   token   = var.vault_token
 }
 
