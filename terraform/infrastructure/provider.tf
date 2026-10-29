@@ -2,6 +2,13 @@
 # pod service account; locally it falls back to KUBECONFIG.
 provider "kubernetes" {}
 
+# Kept only so removed blocks below can resolve during state cleanup.
+provider "kubectl" {
+  host                   = "https://kubernetes.default.svc"
+  cluster_ca_certificate = file("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+  token                  = file("/var/run/secrets/kubernetes.io/serviceaccount/token")
+}
+
 
 provider "helm" {
   kubernetes = {}

@@ -220,3 +220,31 @@ resource "kubernetes_manifest" "mariadb_s3_external_secret" {
     kubernetes_manifest.mariadb_backup_secret_store,
   ]
 }
+
+removed {
+  from = kubectl_manifest.cnpg_backup_secret_store
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = kubectl_manifest.mariadb_backup_secret_store
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = kubectl_manifest.cnpg_s3_external_secret
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = kubectl_manifest.mariadb_s3_external_secret
+  lifecycle {
+    destroy = false
+  }
+}

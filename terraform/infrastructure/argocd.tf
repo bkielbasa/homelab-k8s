@@ -97,3 +97,10 @@ resource "kubernetes_manifest" "homelab_apps" {
     helm_release.argocd,
   ]
 }
+
+removed {
+  from = kubectl_manifest.homelab_apps
+  lifecycle {
+    destroy = false
+  }
+}
