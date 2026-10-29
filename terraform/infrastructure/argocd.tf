@@ -104,3 +104,8 @@ removed {
     destroy = false
   }
 }
+
+import {
+  to = kubernetes_manifest.homelab_apps
+  id = "argocd/homelab-apps"
+}
