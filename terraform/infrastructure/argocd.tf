@@ -63,8 +63,8 @@ resource "pihole_dns_record" "argocd" {
 # parameters from a single static spec.template, so it cannot drive a
 # directory of full Application manifests with per-app sources — the
 # app-of-apps Application is the right primitive for that.
-resource "kubectl_manifest" "homelab_apps" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "homelab_apps" {
+  manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
@@ -91,7 +91,7 @@ resource "kubectl_manifest" "homelab_apps" {
         }
       }
     }
-  })
+  }
 
   depends_on = [
     helm_release.argocd,

@@ -67,8 +67,8 @@ resource "vault_kubernetes_auth_backend_role" "mariadb_backup" {
   token_policies                   = ["default", vault_policy.backups_s3.name]
 }
 
-resource "kubectl_manifest" "cnpg_backup_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "cnpg_backup_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -93,7 +93,7 @@ resource "kubectl_manifest" "cnpg_backup_secret_store" {
         }
       }
     }
-  })
+  }
 
   depends_on = [
     kubernetes_service_account.cnpg_backup,
@@ -101,8 +101,8 @@ resource "kubectl_manifest" "cnpg_backup_secret_store" {
   ]
 }
 
-resource "kubectl_manifest" "mariadb_backup_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "mariadb_backup_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -127,7 +127,7 @@ resource "kubectl_manifest" "mariadb_backup_secret_store" {
         }
       }
     }
-  })
+  }
 
   depends_on = [
     kubernetes_service_account.mariadb_backup,
@@ -136,8 +136,8 @@ resource "kubectl_manifest" "mariadb_backup_secret_store" {
 }
 
 # Sync S3 credentials to cnpg-backup namespace as 'aws-creds'
-resource "kubectl_manifest" "cnpg_s3_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "cnpg_s3_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -171,16 +171,16 @@ resource "kubectl_manifest" "cnpg_s3_external_secret" {
         }
       ]
     }
-  })
+  }
 
   depends_on = [
-    kubectl_manifest.cnpg_backup_secret_store,
+    kubernetes_manifest.cnpg_backup_secret_store,
   ]
 }
 
 # Sync S3 credentials to mariadb-backup namespace as 'aws-creds'
-resource "kubectl_manifest" "mariadb_s3_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "mariadb_s3_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -214,9 +214,9 @@ resource "kubectl_manifest" "mariadb_s3_external_secret" {
         }
       ]
     }
-  })
+  }
 
   depends_on = [
-    kubectl_manifest.mariadb_backup_secret_store,
+    kubernetes_manifest.mariadb_backup_secret_store,
   ]
 }
