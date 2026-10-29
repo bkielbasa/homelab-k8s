@@ -36,6 +36,10 @@ resource "helm_release" "argocd" {
     },
   ]
 
+  field_manager {
+    force_conflicts = true
+  }
+
   depends_on = [
     ovh_domain_zone_record.argocd,
     pihole_dns_record.argocd,
@@ -91,6 +95,10 @@ resource "kubernetes_manifest" "homelab_apps" {
         }
       }
     }
+  }
+
+  field_manager {
+    force_conflicts = true
   }
 
   depends_on = [
