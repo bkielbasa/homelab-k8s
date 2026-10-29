@@ -105,7 +105,8 @@ removed {
   }
 }
 
+
 import {
   to = kubernetes_manifest.homelab_apps
-  id = "argocd/homelab-apps"
+  id = "apiVersion=argoproj.io/v1alpha1,kind=Application,namespace=argocd,name=homelab-apps"
 }

@@ -249,22 +249,26 @@ removed {
   }
 }
 
+
+
+
+
 import {
   to = kubernetes_manifest.cnpg_backup_secret_store
-  id = "cnpg-backup/vault-backend"
+  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=cnpg-backup,name=vault-backend"
 }
 
 import {
   to = kubernetes_manifest.mariadb_backup_secret_store
-  id = "mariadb-backup/vault-backend"
+  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=mariadb-backup,name=vault-backend"
 }
 
 import {
   to = kubernetes_manifest.cnpg_s3_external_secret
-  id = "cnpg-backup/aws-creds"
+  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=cnpg-backup,name=aws-creds"
 }
 
 import {
   to = kubernetes_manifest.mariadb_s3_external_secret
-  id = "mariadb-backup/aws-creds"
+  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=mariadb-backup,name=aws-creds"
 }
