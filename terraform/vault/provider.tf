@@ -1,20 +1,15 @@
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+provider "kubernetes" {}
 
 provider "helm" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
+  kubernetes = {}
 }
 
 provider "aws" {
-  region  = "eu-central-1"
-  profile = "homelab"
+  region = "eu-central-1"
 }
 
 provider "vault" {
-  address = "https://vault.klimczak.xyz"
+  address = var.vault_addr
   token   = var.vault_token
 }
 
