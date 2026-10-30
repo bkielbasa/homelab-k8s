@@ -1,19 +1,17 @@
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+provider "kubernetes" {}
 
 provider "kubectl" {
-  config_path = "~/.kube/config"
+  host                   = "https://kubernetes.default.svc"
+  cluster_ca_certificate = file("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+  token                  = file("/var/run/secrets/kubernetes.io/serviceaccount/token")
 }
 
 provider "helm" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
+  kubernetes = {}
 }
 
 provider "vault" {
-  address = "https://vault.klimczak.xyz"
+  address = var.vault_addr
   token   = var.vault_token
 }
 

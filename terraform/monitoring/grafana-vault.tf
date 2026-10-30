@@ -48,8 +48,8 @@ resource "vault_kubernetes_auth_backend_role" "monitoring" {
   token_policies                   = ["default", vault_policy.monitoring.name]
 }
 
-resource "kubectl_manifest" "monitoring_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "monitoring_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -59,7 +59,7 @@ resource "kubectl_manifest" "monitoring_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -74,7 +74,11 @@ resource "kubectl_manifest" "monitoring_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.monitoring,
@@ -82,8 +86,8 @@ resource "kubectl_manifest" "monitoring_vault_secret_store" {
   ]
 }
 
-resource "kubectl_manifest" "grafana_env_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "grafana_env_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -117,9 +121,37 @@ resource "kubectl_manifest" "grafana_env_external_secret" {
         },
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.monitoring_vault_secret_store,
+    kubernetes_manifest.monitoring_vault_secret_store,
   ]
+}
+
+removed {
+  from = kubectl_manifest.monitoring_vault_secret_store
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = kubectl_manifest.grafana_env_external_secret
+  lifecycle {
+    destroy = false
+  }
+}
+
+import {
+  to = kubernetes_manifest.monitoring_vault_secret_store
+  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=monitoring,name=vault-backend"
+}
+
+import {
+  to = kubernetes_manifest.grafana_env_external_secret
+  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=monitoring,name=grafana-env"
 }
