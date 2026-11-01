@@ -13,7 +13,7 @@ resource "vault_kv_secret_v2" "freshrss_oidc" {
   name  = "freshrss/oidc"
   data_json = jsonencode({
     clientSecret = data.vault_kv_secret_v2.oidc_freshrss.data["clientSecret"]
-  }
+  })
 }
 
 resource "vault_policy" "freshrss" {
