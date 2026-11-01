@@ -3,6 +3,11 @@ variable "vault_token" {
   sensitive = true
 }
 
+variable "vault_addr" {
+  type    = string
+  default = "https://vault.klimczak.xyz"
+}
+
 variable "pihole_password" {
   type      = string
   sensitive = true

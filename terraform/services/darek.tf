@@ -41,8 +41,8 @@ resource "vault_kubernetes_auth_backend_role" "darek" {
   token_policies                   = ["default", vault_policy.darek.name]
 }
 
-resource "kubectl_manifest" "darek_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "darek_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -52,7 +52,7 @@ resource "kubectl_manifest" "darek_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -67,7 +67,11 @@ resource "kubectl_manifest" "darek_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.darek,
@@ -76,8 +80,8 @@ resource "kubectl_manifest" "darek_vault_secret_store" {
 }
 
 # Pulls every field of `secret/data/darek` into a K8s Secret named `darek-env`.
-resource "kubectl_manifest" "darek_env_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "darek_env_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -102,9 +106,13 @@ resource "kubectl_manifest" "darek_env_external_secret" {
         }
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.darek_vault_secret_store
+    kubernetes_manifest.darek_vault_secret_store
   ]
 }

@@ -35,8 +35,8 @@ resource "vault_kubernetes_auth_backend_role" "actualbudget" {
   token_policies                   = ["default", vault_policy.actualbudget.name]
 }
 
-resource "kubectl_manifest" "actualbudget_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "actualbudget_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -46,7 +46,7 @@ resource "kubectl_manifest" "actualbudget_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -61,7 +61,11 @@ resource "kubectl_manifest" "actualbudget_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.actualbudget,
@@ -72,8 +76,8 @@ resource "kubectl_manifest" "actualbudget_vault_secret_store" {
 # clientId is public but also lives here so the chart has a single source for
 # both OIDC credentials (it skips rendering its own copy when existingSecret
 # is set).
-resource "kubectl_manifest" "actualbudget_oidc_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "actualbudget_oidc_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -112,9 +116,13 @@ resource "kubectl_manifest" "actualbudget_oidc_external_secret" {
         },
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.actualbudget_vault_secret_store,
+    kubernetes_manifest.actualbudget_vault_secret_store,
   ]
 }

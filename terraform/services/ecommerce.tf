@@ -54,8 +54,8 @@ resource "vault_kubernetes_auth_backend_role" "ecommerce" {
   token_policies                   = ["default", vault_policy.ecommerce.name]
 }
 
-resource "kubectl_manifest" "ecommerce_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "ecommerce_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -65,7 +65,7 @@ resource "kubectl_manifest" "ecommerce_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -80,7 +80,11 @@ resource "kubectl_manifest" "ecommerce_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.ecommerce,
@@ -93,8 +97,8 @@ resource "kubectl_manifest" "ecommerce_vault_secret_store" {
 # Vault field becomes an env var of the same name (POSTGRES_HOST/PORT/USER/
 # PASSWORD/DB + SESSION_SECRET today; a Stripe key or SMTP password later needs
 # no chart change).
-resource "kubectl_manifest" "ecommerce_db_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "ecommerce_db_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -119,9 +123,13 @@ resource "kubectl_manifest" "ecommerce_db_external_secret" {
         }
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.ecommerce_vault_secret_store
+    kubernetes_manifest.ecommerce_vault_secret_store
   ]
 }

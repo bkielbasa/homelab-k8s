@@ -77,8 +77,8 @@ resource "vault_kubernetes_auth_backend_role" "workspace" {
   token_policies                   = ["default", vault_policy.workspace.name]
 }
 
-resource "kubectl_manifest" "workspace_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "workspace_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -88,7 +88,7 @@ resource "kubectl_manifest" "workspace_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -103,7 +103,11 @@ resource "kubectl_manifest" "workspace_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.workspace,
@@ -111,8 +115,8 @@ resource "kubectl_manifest" "workspace_vault_secret_store" {
   ]
 }
 
-resource "kubectl_manifest" "workspace_db_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "workspace_db_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -139,17 +143,21 @@ resource "kubectl_manifest" "workspace_db_external_secret" {
         },
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.workspace_vault_secret_store,
+    kubernetes_manifest.workspace_vault_secret_store,
   ]
 }
 
 # OIDC client secret synced from Vault so the app can complete the
 # authorization-code dance with Authentik. Written by auth/oidc-secrets.tf.
-resource "kubectl_manifest" "workspace_sso_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "workspace_sso_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -176,9 +184,13 @@ resource "kubectl_manifest" "workspace_sso_external_secret" {
         },
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.workspace_vault_secret_store,
+    kubernetes_manifest.workspace_vault_secret_store,
   ]
 }

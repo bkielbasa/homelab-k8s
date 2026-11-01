@@ -35,8 +35,8 @@ resource "vault_kubernetes_auth_backend_role" "headlamp" {
   token_policies                   = ["default", vault_policy.headlamp.name]
 }
 
-resource "kubectl_manifest" "headlamp_vault_secret_store" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "headlamp_vault_secret_store" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "SecretStore"
     metadata = {
@@ -46,7 +46,7 @@ resource "kubectl_manifest" "headlamp_vault_secret_store" {
     spec = {
       provider = {
         vault = {
-          server  = "https://vault.klimczak.xyz"
+          server  = "http://vault.vault.svc.cluster.local:8200"
           path    = "secret"
           version = "v2"
           auth = {
@@ -61,7 +61,11 @@ resource "kubectl_manifest" "headlamp_vault_secret_store" {
         }
       }
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
     kubernetes_service_account.headlamp,
@@ -73,8 +77,8 @@ resource "kubectl_manifest" "headlamp_vault_secret_store" {
 # Secret via envFrom, so this Secret carries the full OIDC config: only
 # clientSecret is sensitive and comes from Vault; the rest is static config
 # that used to live in chart values.
-resource "kubectl_manifest" "headlamp_oidc_external_secret" {
-  yaml_body = yamlencode({
+resource "kubernetes_manifest" "headlamp_oidc_external_secret" {
+  manifest = {
     apiVersion = "external-secrets.io/v1"
     kind       = "ExternalSecret"
     metadata = {
@@ -118,9 +122,13 @@ resource "kubectl_manifest" "headlamp_oidc_external_secret" {
         },
       ]
     }
-  })
+  }
+
+  field_manager {
+    force_conflicts = true
+  }
 
   depends_on = [
-    kubectl_manifest.headlamp_vault_secret_store,
+    kubernetes_manifest.headlamp_vault_secret_store,
   ]
 }
