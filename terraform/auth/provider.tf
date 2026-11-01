@@ -21,7 +21,7 @@ data "vault_kv_secret_v2" "authentik_app" {
 }
 
 provider "authentik" {
-  url   = "http://authentik-server.authentik.svc.cluster.local"
+  url   = "https://authentik.klimczak.xyz"
   token = data.vault_kv_secret_v2.authentik_app.data["bootstrap_token"]
 }
 
