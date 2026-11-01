@@ -32,3 +32,8 @@ variable "public_ip" {
   type    = string
   default = "212.87.243.126"
 }
+
+variable "authentik_url" {
+  type    = string
+  default = "https://authentik.klimczak.xyz"
+}

@@ -21,7 +21,7 @@ data "vault_kv_secret_v2" "authentik_app" {
 }
 
 provider "authentik" {
-  url   = "https://authentik.klimczak.xyz"
+  url   = var.authentik_url
   token = data.vault_kv_secret_v2.authentik_app.data["bootstrap_token"]
 }
 
