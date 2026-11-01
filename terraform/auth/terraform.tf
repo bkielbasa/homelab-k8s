@@ -28,12 +28,5 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket       = "homelab-terr"
-    key          = "homelab-k8s/auth/terraform.tfstate"
-    region       = "eu-central-1"
-    encrypt      = true
-    profile      = "homelab"
-    use_lockfile = true
-  }
+  backend "s3" {}
 }

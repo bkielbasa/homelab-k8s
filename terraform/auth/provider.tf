@@ -1,12 +1,8 @@
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+provider "kubernetes" {}
 
 
 provider "helm" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
+  kubernetes = {}
 }
 
 provider "vault" {
