@@ -63,10 +63,6 @@ resource "kubernetes_manifest" "actualbudget_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.actualbudget,
     vault_kubernetes_auth_backend_role.actualbudget,
@@ -116,10 +112,6 @@ resource "kubernetes_manifest" "actualbudget_oidc_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

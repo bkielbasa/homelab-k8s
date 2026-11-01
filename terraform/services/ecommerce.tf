@@ -82,10 +82,6 @@ resource "kubernetes_manifest" "ecommerce_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.ecommerce,
     vault_kubernetes_auth_backend_role.ecommerce,
@@ -123,10 +119,6 @@ resource "kubernetes_manifest" "ecommerce_db_external_secret" {
         }
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

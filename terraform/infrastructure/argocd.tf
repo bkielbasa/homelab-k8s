@@ -93,10 +93,6 @@ resource "kubernetes_manifest" "homelab_apps" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     helm_release.argocd,
   ]

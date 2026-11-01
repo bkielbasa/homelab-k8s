@@ -84,10 +84,6 @@ resource "kubernetes_manifest" "infra_guy_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.infra_guy,
     vault_kubernetes_auth_backend_role.infra_guy,
@@ -121,10 +117,6 @@ resource "kubernetes_manifest" "infra_guy_env_external_secret" {
         }
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

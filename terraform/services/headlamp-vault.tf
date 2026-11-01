@@ -63,10 +63,6 @@ resource "kubernetes_manifest" "headlamp_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.headlamp,
     vault_kubernetes_auth_backend_role.headlamp,
@@ -122,10 +118,6 @@ resource "kubernetes_manifest" "headlamp_oidc_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

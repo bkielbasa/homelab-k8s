@@ -76,10 +76,6 @@ resource "kubernetes_manifest" "monitoring_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.monitoring,
     vault_kubernetes_auth_backend_role.monitoring,
@@ -121,10 +117,6 @@ resource "kubernetes_manifest" "grafana_env_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

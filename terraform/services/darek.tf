@@ -69,10 +69,6 @@ resource "kubernetes_manifest" "darek_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.darek,
     vault_kubernetes_auth_backend_role.darek,
@@ -106,10 +102,6 @@ resource "kubernetes_manifest" "darek_env_external_secret" {
         }
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

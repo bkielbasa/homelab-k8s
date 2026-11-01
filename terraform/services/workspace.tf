@@ -105,10 +105,6 @@ resource "kubernetes_manifest" "workspace_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.workspace,
     vault_kubernetes_auth_backend_role.workspace,
@@ -143,10 +139,6 @@ resource "kubernetes_manifest" "workspace_db_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [
@@ -184,10 +176,6 @@ resource "kubernetes_manifest" "workspace_sso_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

@@ -95,10 +95,6 @@ resource "kubernetes_manifest" "cnpg_backup_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.cnpg_backup,
     vault_kubernetes_auth_backend_role.cnpg_backup,
@@ -131,10 +127,6 @@ resource "kubernetes_manifest" "mariadb_backup_secret_store" {
         }
       }
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [
@@ -181,10 +173,6 @@ resource "kubernetes_manifest" "cnpg_s3_external_secret" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_manifest.cnpg_backup_secret_store,
   ]
@@ -226,10 +214,6 @@ resource "kubernetes_manifest" "mariadb_s3_external_secret" {
         }
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

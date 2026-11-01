@@ -66,10 +66,6 @@ resource "kubernetes_manifest" "smarthome_metrics_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     kubernetes_service_account.smarthome_metrics,
     vault_kubernetes_auth_backend_role.smarthome_metrics,
@@ -112,10 +108,6 @@ resource "kubernetes_manifest" "smarthome_metrics_db_external_secret" {
         }
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [

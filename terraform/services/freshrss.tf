@@ -69,10 +69,6 @@ resource "kubernetes_manifest" "freshrss_vault_secret_store" {
     }
   }
 
-  field_manager {
-    force_conflicts = true
-  }
-
   depends_on = [
     vault_kubernetes_auth_backend_role.freshrss,
   ]
@@ -106,10 +102,6 @@ resource "kubernetes_manifest" "freshrss_oidc_external_secret" {
         },
       ]
     }
-  }
-
-  field_manager {
-    force_conflicts = true
   }
 
   depends_on = [
