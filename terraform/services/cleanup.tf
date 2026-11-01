@@ -164,12 +164,12 @@ import {
 
 import {
   to = kubernetes_manifest.smarthome_metrics_vault_secret_store
-  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=smarthome-metrics,name=vault-backend"
+  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=smarthome,name=vault-backend"
 }
 
 import {
   to = kubernetes_manifest.smarthome_metrics_db_external_secret
-  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=smarthome-metrics,name=smarthome-metrics-db"
+  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=smarthome,name=smarthome-metrics-db"
 }
 
 import {
