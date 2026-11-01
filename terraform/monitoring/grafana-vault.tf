@@ -132,26 +132,6 @@ resource "kubernetes_manifest" "grafana_env_external_secret" {
   ]
 }
 
-removed {
-  from = kubectl_manifest.monitoring_vault_secret_store
-  lifecycle {
-    destroy = false
-  }
-}
 
-removed {
-  from = kubectl_manifest.grafana_env_external_secret
-  lifecycle {
-    destroy = false
-  }
-}
 
-import {
-  to = kubernetes_manifest.monitoring_vault_secret_store
-  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=monitoring,name=vault-backend"
-}
 
-import {
-  to = kubernetes_manifest.grafana_env_external_secret
-  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=monitoring,name=grafana-env"
-}

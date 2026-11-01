@@ -237,54 +237,14 @@ resource "kubernetes_manifest" "mariadb_s3_external_secret" {
   ]
 }
 
-removed {
-  from = kubectl_manifest.cnpg_backup_secret_store
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = kubectl_manifest.mariadb_backup_secret_store
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = kubectl_manifest.cnpg_s3_external_secret
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = kubectl_manifest.mariadb_s3_external_secret
-  lifecycle {
-    destroy = false
-  }
-}
 
 
 
 
 
-import {
-  to = kubernetes_manifest.cnpg_backup_secret_store
-  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=cnpg-backup,name=vault-backend"
-}
 
-import {
-  to = kubernetes_manifest.mariadb_backup_secret_store
-  id = "apiVersion=external-secrets.io/v1,kind=SecretStore,namespace=mariadb-backup,name=vault-backend"
-}
 
-import {
-  to = kubernetes_manifest.cnpg_s3_external_secret
-  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=cnpg-backup,name=aws-creds"
-}
 
-import {
-  to = kubernetes_manifest.mariadb_s3_external_secret
-  id = "apiVersion=external-secrets.io/v1,kind=ExternalSecret,namespace=mariadb-backup,name=aws-creds"
-}
+
+
+

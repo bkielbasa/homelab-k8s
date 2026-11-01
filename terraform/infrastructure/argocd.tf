@@ -102,15 +102,5 @@ resource "kubernetes_manifest" "homelab_apps" {
   ]
 }
 
-removed {
-  from = kubectl_manifest.homelab_apps
-  lifecycle {
-    destroy = false
-  }
-}
 
 
-import {
-  to = kubernetes_manifest.homelab_apps
-  id = "apiVersion=argoproj.io/v1alpha1,kind=Application,namespace=argocd,name=homelab-apps"
-}
