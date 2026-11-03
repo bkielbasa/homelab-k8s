@@ -144,3 +144,19 @@ resource "pihole_dns_record" "infra_guy" {
   domain = "infra.klimczak.xyz"
   ip     = "192.168.1.30"
 }
+
+# ---------------------------------------------------------------------------
+# qBittorrent (subdomain: tor)
+# ---------------------------------------------------------------------------
+resource "ovh_domain_zone_record" "qbittorrent" {
+  zone      = "klimczak.xyz"
+  subdomain = "tor"
+  fieldtype = "A"
+  ttl       = 3600
+  target    = var.public_ip
+}
+
+resource "pihole_dns_record" "qbittorrent" {
+  domain = "tor.klimczak.xyz"
+  ip     = "192.168.1.30"
+}

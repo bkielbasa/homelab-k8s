@@ -1,0 +1,51 @@
+replicaCount: 1
+
+image:
+  repository: lscr.io/linuxserver/qbittorrent
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+serviceAccount:
+  create: false
+  name: default
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts: []
+  tls: []
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  storageClass: qnap-nfs
+  size: 5Gi
+
+env:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "Europe/Warsaw"
+  WEBUI_PORT: "8080"
+
+media:
+  enabled: true
+  nfs:
+    server: "192.168.1.148"
+    path: "/jellyfin-media"
+  mountPath: /media

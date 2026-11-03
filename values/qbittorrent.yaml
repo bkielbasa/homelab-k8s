@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: lscr.io/linuxserver/qbittorrent
+  pullPolicy: IfNotPresent
+  tag: "5.0.0"
+
+serviceAccount:
+  create: false
+  name: default
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  storageClass: qnap-nfs
+  size: 5Gi
+
+env:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "Europe/Warsaw"
+  WEBUI_PORT: "8080"
+
+media:
+  enabled: true
+  nfs:
+    server: "192.168.1.148"
+    path: "/jellyfin-media"
+  mountPath: /media
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+  hosts:
+    - host: tor.klimczak.xyz
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - tor.klimczak.xyz
+      secretName: tor-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
