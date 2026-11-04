@@ -16,8 +16,8 @@ data "kubernetes_service_account" "vault_auth" {
 }
 
 resource "vault_kubernetes_auth_backend_config" "kubernetes" {
-  backend            = vault_auth_backend.kubernetes.path
-  kubernetes_host    = "https://kubernetes.default.svc:443"
+  backend         = vault_auth_backend.kubernetes.path
+  kubernetes_host = "https://kubernetes.default.svc:443"
 
   disable_local_ca_jwt = false
 

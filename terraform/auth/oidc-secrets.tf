@@ -30,14 +30,6 @@ resource "vault_kv_secret_v2" "oidc_grafana" {
   })
 }
 
-resource "vault_kv_secret_v2" "oidc_actualbudget" {
-  mount = "secret"
-  name  = "oidc/actualbudget"
-  data_json = jsonencode({
-    clientSecret = authentik_provider_oauth2.actualbudget.client_secret
-  })
-}
-
 resource "vault_kv_secret_v2" "oidc_headlamp" {
   mount = "secret"
   name  = "oidc/headlamp"

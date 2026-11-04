@@ -13,7 +13,6 @@ step 2 is not optional (see the warning).
 | jellyfin | `argocd-apps/jellyfin.yaml` | jellyfin/jellyfin `3.2.0` | `values/jellyfin.yaml` |
 | vaultwarden | `argocd-apps/vaultwarden.yaml` | vaultwarden `0.46.0` | `values/vaultwarden-values.yaml` |
 | headlamp | `argocd-apps/headlamp.yaml` | headlamp `0.41.0` | `values/headlamp.yaml` |
-| actualbudget | `argocd-apps/actualbudget.yaml` | actualbudget `1.9.4` | `values/actualbudget.yaml` + `values/actualbudget-image.yaml` |
 | prometheus (grafana) | `argocd-apps/prometheus.yaml` | kube-prometheus-stack `70.4.1` | `values/prometheus.yaml` |
 | loki | `argocd-apps/loki.yaml` | loki `7.1.0` | `values/loki.yaml` |
 | alloy | `argocd-apps/alloy.yaml` | alloy `0.9.2` | `values/alloy.yaml` |
@@ -26,8 +25,7 @@ This is on top of the 6 apps that already ran under Argo CD (`darek`,
 `vault`, `external-secrets`, `authentik`, `argocd`, `nginx-ingress`,
 `metallb`, `linkerd-*`, `cert-manager-webhook-ovh` — plus, for every
 migrated service, the namespace, DNS records, Authentik OIDC, and the new
-Vault/ESO secret glue (`headlamp-vault.tf`, `actualbudget-vault.tf`,
-`grafana-vault.tf`).
+Vault/ESO secret glue (`headlamp-vault.tf`, `grafana-vault.tf`).
 
 ## How the Applications get applied
 
@@ -56,7 +54,7 @@ git add -A && git commit -m "Move services to Argo CD" && git push
 
 **Warning:** if you run `terraform apply` without this step, Terraform will
 execute `helm uninstall` for each removed `helm_release`, deleting the
-running workloads — including chart-managed PVCs (actualbudget, vaultwarden).
+running workloads — including chart-managed PVCs (vaultwarden).
 Run the helper script (idempotent, safe to re-run):
 
 ```
@@ -69,7 +67,7 @@ orphaned, until Argo adopts them minutes later.
 ### 3. Apply the roots (glue first, apps last)
 
 ```
-terraform -chdir=terraform/services apply      # ESO glue for headlamp/actualbudget; releases untouched
+terraform -chdir=terraform/services apply      # ESO glue for headlamp; releases untouched
 terraform -chdir=terraform/monitoring apply    # grafana-env ESO glue; releases untouched
 terraform -chdir=terraform/infrastructure apply # creates homelab-apps -> Argo adopts everything
 ```
@@ -89,7 +87,7 @@ curl -s -o /dev/null -w "%{http_code} %{ssl_verify_result}\n" https://<host>.kli
 ```
 
 Check Grafana login (OIDC) and the smarthome-metrics datasource, plus
-headlamp/actualbudget SSO logins — those three changed secret plumbing
+headlamp SSO logins — changed secret plumbing
 (`set_sensitive` → ExternalSecret).
 
 ## Adoption pre-check (already done)
@@ -115,10 +113,7 @@ Known intended diffs only:
   `sh.helm.release.v1.*` Secrets from the Terraform era (harmless; they make
   `helm list` show ghosts). Optional cleanup: delete them per namespace.
 - **Image bumps are now git-only:** with `selfHeal: true`, out-of-band
-  `kubectl set image` / `helm upgrade` changes get reverted. The actualbudget
-  bot keeps working — it commits `values/actualbudget-image.yaml`, and Argo
-  now auto-deploys that push within ~3 minutes (previously it needed a
-  Terraform apply).
+  `kubectl set image` / `helm upgrade` changes get reverted.
 - **New services** should follow the `add-cluster-service` skill: create the
   chart/values/OIDC/DNS/Vault glue as before, then add an
   `argocd-apps/<svc>.yaml` — no `helm_release` block.

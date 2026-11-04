@@ -18,22 +18,6 @@ resource "pihole_dns_record" "jellyfin" {
 }
 
 # ---------------------------------------------------------------------------
-# ActualBudget (subdomain: budget)
-# ---------------------------------------------------------------------------
-resource "ovh_domain_zone_record" "actualbudget" {
-  zone      = "klimczak.xyz"
-  subdomain = "budget"
-  fieldtype = "A"
-  ttl       = 3600
-  target    = var.public_ip
-}
-
-resource "pihole_dns_record" "budget-board" {
-  domain = "budget.klimczak.xyz"
-  ip     = "192.168.1.30"
-}
-
-# ---------------------------------------------------------------------------
 # Vaultwarden (subdomain: pass)
 # ---------------------------------------------------------------------------
 resource "ovh_domain_zone_record" "vaultwarden" {

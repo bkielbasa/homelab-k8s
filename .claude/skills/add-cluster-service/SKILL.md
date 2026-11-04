@@ -159,7 +159,7 @@ name if adopting an existing install):
 
 Add `syncOptions: [CreateNamespace=true]` only when the namespace is NOT
 created by Terraform (e.g. `monitoring`). Secrets never go in values files —
-see `<svc>-vault.tf` (headlamp: `envFrom`, actualbudget: `existingSecret`,
+see `<svc>-vault.tf` (headlamp: `envFrom`,
 grafana: `envFromSecrets`).
 
 ## Verify (after apply)

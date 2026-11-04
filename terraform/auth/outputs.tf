@@ -49,12 +49,6 @@ output "jellyfin_oidc_client_secret" {
   sensitive   = true
 }
 
-output "actualbudget_oidc_client_secret" {
-  description = "Client secret for the ActualBudget OIDC provider"
-  value       = authentik_provider_oauth2.actualbudget.client_secret
-  sensitive   = true
-}
-
 output "freshrss_oidc_client_secret" {
   description = "Client secret for the FreshRSS OIDC provider (written to Vault by services module)"
   value       = authentik_provider_oauth2.freshrss.client_secret

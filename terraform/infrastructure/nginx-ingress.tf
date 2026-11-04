@@ -22,9 +22,9 @@ resource "helm_release" "nginx_ingress" {
         }
         hostNetwork = true
         config = {
-          "ssl-redirect"        = "true"
-          "ssl-protocols"       = "TLSv1.2 TLSv1.3"
-          "ssl-ciphers"         = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+          "ssl-redirect"         = "true"
+          "ssl-protocols"        = "TLSv1.2 TLSv1.3"
+          "ssl-ciphers"          = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
           "client-max-body-size" = "500m"
         }
       }
