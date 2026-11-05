@@ -22,8 +22,11 @@
   # Keep this equal to the NixOS version you install (26.05).
   system.stateVersion = "26.05";
 
-  # Dev/workstation-ish box: wifi + ethernet via NetworkManager.
+  # Dev/workstation-ish box: ethernet via NetworkManager. Wi-Fi (Intel
+  # iwlwifi) is intentionally disabled — it had to be blacklisted on the
+  # previous Ubuntu install, keep it that way here.
   networking.networkmanager.enable = true;
+  boot.blacklistedKernelModules = [ "iwlwifi" "iwlmvm" "cfg80211" ];
 
   # ------------------------------------------------------------------
   # Users
@@ -31,16 +34,18 @@
   users.users.bklimczak = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
+    initialPassword = "changeme"; # change after first login
     openssh.authorizedKeys.keys = [
-      # TODO(you): paste your real SSH pubkey.
-      # "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA..."
+      # Control machine (mini-pc) key used by colmena
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAJaCuS/oQqN+AmmwAPwYNOwdKtl3ZhsfFEYfxR95CwT bklimczak@mini-pc"
+      # Personal key
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINzdCbnPkhIvwE4lVVKVF9bcAyz4gNeurZ//B6y3Ed5e bartlomiej.klimczak@bayer.com"
     ];
   };
 
-  # Root key for bootstrapping / colmena logins (root@). Replace with
-  # your real key. Until then sshd will ignore this bogus entry.
+  # Root key for bootstrapping / colmena logins (root@).
   users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAEXAMPLE_REPLACE_ME"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAJaCuS/oQqN+AmmwAPwYNOwdKtl3ZhsfFEYfxR95CwT bklimczak@mini-pc"
   ];
 
   users.mutableUsers = false;

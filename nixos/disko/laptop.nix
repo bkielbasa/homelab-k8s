@@ -8,7 +8,7 @@
 {
   disko.devices.disk.main = {
     type = "disk";
-    device = lib.mkDefault "/dev/nvme0n1"; # CHANGE ME if not NVMe
+    device = lib.mkDefault "/dev/sda"; # SATA SSD (WDC WDS240G2G0B, 223.6G) - verified via lsblk
     content = {
       type = "gpt";
       partitions = {
