@@ -12,7 +12,7 @@
 set -euo pipefail
 
 TARGET_HOST="bklimczak@192.168.1.160"
-FLAKE="github:bkielbasa/homelab-k8s#laptop"
+FLAKE="github:bkielbasa/homelab-k8s?dir=nixos#laptop"
 
 nix --extra-experimental-features "nix-command flakes" run github:nix-community/nixos-anywhere -- \
   --flake "${FLAKE}" \
