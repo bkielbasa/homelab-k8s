@@ -54,6 +54,9 @@
     openssh.authorizedKeys.keys = [
       # Control machine (mini-pc) key used by colmena
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAJaCuS/oQqN+AmmwAPwYNOwdKtl3ZhsfFEYfxR95CwT bklimczak@mini-pc"
+      # Jumphost (mini2). ssh-copy-id cannot install this: password auth is
+      # off and these keys are owned by the NixOS config.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhNeI6xFkYmYvyYNZh/Ih3ZT7DkHgXJyRylE6ttKy6j bklimczak@mini2"
       # Personal key
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINzdCbnPkhIvwE4lVVKVF9bcAyz4gNeurZ//B6y3Ed5e bartlomiej.klimczak@bayer.com"
     ];
@@ -62,6 +65,7 @@
   # Root key for bootstrapping / colmena logins (root@).
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAJaCuS/oQqN+AmmwAPwYNOwdKtl3ZhsfFEYfxR95CwT bklimczak@mini-pc"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhNeI6xFkYmYvyYNZh/Ih3ZT7DkHgXJyRylE6ttKy6j bklimczak@mini2"
   ];
 
   users.mutableUsers = false;
