@@ -57,7 +57,8 @@ in
   users.users.bklimczak = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
-    initialPassword = "changeme"; # change after first login
+    # yescrypt hash. users.mutableUsers is false, so `passwd` cannot change this.
+    hashedPassword = "$y$j9T$s5VzSjTxfzrxDCBYgjHyq.$rmbIwaP7YiWPvmU3azGPzhjocPXh/.WV2nSCt8JvK95";
     openssh.authorizedKeys.keys = [
       # Control machine (mini-pc) key used by colmena
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAJaCuS/oQqN+AmmwAPwYNOwdKtl3ZhsfFEYfxR95CwT bklimczak@mini-pc"
