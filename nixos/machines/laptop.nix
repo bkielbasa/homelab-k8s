@@ -28,6 +28,14 @@
   networking.networkmanager.enable = true;
   boot.blacklistedKernelModules = [ "iwlwifi" "iwlmvm" "cfg80211" ];
 
+  # nixos-anywhere builds nixosConfigurations.laptop, which does not import
+  # modules/common.nix (colmena does). Without this, the installed system has
+  # no sshd and the default firewall drops port 22. openFirewall defaults on.
+  services.openssh = {
+    enable = true;
+    settings.PasswordAuthentication = false;
+  };
+
   # ------------------------------------------------------------------
   # Users
   # ------------------------------------------------------------------
