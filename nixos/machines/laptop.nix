@@ -36,6 +36,14 @@
     settings.PasswordAuthentication = false;
   };
 
+  # This box is a headless worker. Closing the lid must not suspend it,
+  # on battery, on AC, or in a dock.
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
+
   # ------------------------------------------------------------------
   # Users
   # ------------------------------------------------------------------
