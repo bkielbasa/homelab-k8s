@@ -50,9 +50,13 @@
   # jellyfin-media PV) need /sbin/mount.nfs from nfs-utils on the HOST,
   # otherwise kubelet fails with "mount program didn't pass remote address".
   # ----------------------------------------------------------------------
-  boot.kernelModules = [ "nfs" "nfsv4" ];
+  # Linkerd's proxy-init needs iptables (legacy) kernel support + userspace
+  # tooling. NixOS defaults to nftables, so enable the iptables modules
+  # and ship the iptables binary on every node that may run meshed pods.
+  boot.kernelModules = [ "nfs" "nfsv4" "ip_tables" "iptable_filter" "iptable_nat" "iptable_mangle" ];
   environment.systemPackages = with pkgs; [
     nfs-utils
+    iptables
     git
     vim
     htop
