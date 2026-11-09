@@ -228,7 +228,7 @@ prometheus:
     additionalScrapeConfigs:
       - job_name: 'node-exporter'
         static_configs:
-          - targets: ['192.168.1.29:9100','mail.klimczak.xyz:9100']
+          - targets: ['192.168.1.29:9100']
 
 
 alertmanager:
