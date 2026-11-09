@@ -245,6 +245,13 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 4h
       receiver: 'pagerduty'
+      routes:
+        - matchers:
+            - alertname = "Watchdog"
+          receiver: 'null'
+        - matchers:
+            - alertname = "InfoInhibitor"
+          receiver: 'null'
     receivers:
       - name: 'pagerduty'
         pagerduty_configs:
