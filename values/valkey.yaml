@@ -19,6 +19,13 @@ replica:
   persistence:
     enabled: true
     storageClass: qnap-nfs
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
 
 master:
   extraEnvVars:

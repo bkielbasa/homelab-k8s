@@ -85,7 +85,7 @@ grafana:
           cpu: 10m
           memory: 32Mi
         limits:
-          cpu: 100m
+          cpu: 200m
           memory: 64Mi
       securityContext:
         # No runAsUser override on purpose: the pod runs as 472/472 with
