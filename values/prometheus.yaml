@@ -233,10 +233,9 @@ prometheus:
 
 alertmanager:
   enabled: true
-  # Mount the PagerDuty routing key Secret (created in the monitoring
-  # namespace) so Alertmanager can read it without embedding it in git.
-  secrets:
-    - pagerduty-routing-key
+  alertmanagerSpec:
+    secrets:
+      - pagerduty-routing-key
   config:
     global:
       resolve_timeout: 5m
