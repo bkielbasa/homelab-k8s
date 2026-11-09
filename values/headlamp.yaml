@@ -13,7 +13,7 @@ config:
       # terraform/services/headlamp-vault.tf. The chart must not render its
       # own copy: clientSecret is no longer a chart value.
       create: false
-      name: headlamp-k8s-oidc
+      name: headlamp-oidc
     externalSecret:
       # Chart reads OIDC_* env vars from an existing Secret via envFrom.
       enabled: true
