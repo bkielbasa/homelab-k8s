@@ -252,6 +252,7 @@ alertmanager:
           - routing_key_file: /etc/alertmanager/secrets/pagerduty-routing-key/routingKey
             severity: '{{ .CommonLabels.severity }}'
             description: '{{ .CommonAnnotations.summary }}'
+      - name: 'null'
     inhibit_rules:
       - source_matchers:
           - severity="critical"
