@@ -17,54 +17,6 @@ resource "pihole_dns_record" "grafana" {
   ip     = "192.168.1.30"
 }
 
-resource "kubernetes_manifest" "linkerd_proxy_servicemonitor" {
-  manifest = {
-    apiVersion = "monitoring.coreos.com/v1"
-    kind       = "ServiceMonitor"
-    metadata = {
-      name      = "linkerd-proxy"
-      namespace = "monitoring"
-      labels = {
-        "app.kubernetes.io/name"      = "linkerd-proxy"
-        "app.kubernetes.io/component" = "proxy"
-      }
-    }
-    spec = {
-      jobLabel = "linkerd-proxy"
-      selector = {
-        matchLabels = {
-          "linkerd.io/control-plane-component" = "proxy"
-        }
-      }
-      namespaceSelector = {
-        any = true
-      }
-      endpoints = [
-        {
-          port     = "linkerd-admin"
-          interval = "30s"
-          path     = "/metrics"
-          relabelings = [
-            {
-              sourceLabels = ["__meta_kubernetes_pod_container_name"]
-              action       = "keep"
-              regex        = "^linkerd-proxy$"
-            },
-            {
-              sourceLabels = ["__meta_kubernetes_namespace"]
-              targetLabel  = "namespace"
-            },
-            {
-              sourceLabels = ["__meta_kubernetes_pod_name"]
-              targetLabel  = "pod"
-            },
-            {
-              sourceLabels = ["__meta_kubernetes_pod_label_linkerd_io_proxy_deployment"]
-              targetLabel  = "deployment"
-            }
-          ]
-        }
-      ]
-    }
-  }
-}
+# Linkerd monitoring removed: control plane is currently broken on NixOS
+# nodes (missing ip_tables kernel module), so these targets never become
+# healthy. Re-add once linkerd is fixed or replaced.
