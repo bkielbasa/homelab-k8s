@@ -230,13 +230,33 @@ prometheus:
         static_configs:
           - targets: ['192.168.1.29:9100','mail.klimczak.xyz:9100']
 
-      - job_name: nextcloud
-        static_configs:
-          - targets: ['nextcloud-exporter.nextcloud.svc.cluster.local']
-
       - job_name: pve
         static_configs:
          - targets: ['192.168.1.2:9221']
 alertmanager:
   enabled: true
-
+  # Mount the PagerDuty routing key Secret (created in the monitoring
+  # namespace) so Alertmanager can read it without embedding it in git.
+  secrets:
+    - pagerduty-routing-key
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'namespace', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'pagerduty'
+    receivers:
+      - name: 'pagerduty'
+        pagerduty_configs:
+          - routing_key_file: /etc/alertmanager/secrets/pagerduty-routing-key/routingKey
+            severity: '{{ .CommonLabels.severity }}'
+            description: '{{ .CommonAnnotations.summary }}'
+    inhibit_rules:
+      - source_matchers:
+          - severity="critical"
+        target_matchers:
+          - severity="warning"
+        equal: ['alertname', 'namespace']
