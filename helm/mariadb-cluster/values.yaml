@@ -16,7 +16,7 @@ mariadb:
     generate: true
 
 backup:
-  enabled: true
+  enabled: false
   schedule: "0 3 * * *"  # codziennie 03:00
   bucket: "homelab-db-backups"  # zmień na swój bucket
   region: "eu-central-1"

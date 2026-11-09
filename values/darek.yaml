@@ -42,7 +42,7 @@ ingress:
       secretName: darek-tls
 
 dailyDigest:
-  enabled: true
+  enabled: false
   schedule: "0 7 * * *"
   timeZone: "Europe/Warsaw"
 
