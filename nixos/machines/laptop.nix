@@ -49,7 +49,22 @@ in
     HandleLidSwitch = "ignore";
     HandleLidSwitchExternalPower = "ignore";
     HandleLidSwitchDocked = "ignore";
+    IdleAction = "ignore";
   };
+
+  # Belt and braces: logind's HandleLidSwitch=ignore is not always enough
+  # (desktop/session inhibitors, upower, ...). Disable every sleep path in
+  # systemd so nothing can put this box to sleep, ever.
+  systemd.sleep.settings.Sleep = {
+    AllowSuspend = "no";
+    AllowHibernation = "no";
+    AllowHybridSleep = "no";
+    AllowSuspendThenHibernate = "no";
+  };
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
 
   # ------------------------------------------------------------------
   # Users
@@ -130,6 +145,22 @@ in
       Restart = "always";
       RestartSec = "10";
     };
+  };
+
+  # ------------------------------------------------------------------
+  # Ollama (local LLM) — exposed on the LAN so other machines (e.g. the
+  # OpenCode instance on mini-pc) can use it.
+  # ------------------------------------------------------------------
+  services.ollama = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 11434;
+    package = pkgs.ollama-cpu;
+    openFirewall = true;
+    environmentVariables = {
+      OLLAMA_CONTEXT_LENGTH = "65536";
+    };
+    loadModels = [ "qwen3.5:9b" ];
   };
 
   # ------------------------------------------------------------------
