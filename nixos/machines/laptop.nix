@@ -147,6 +147,12 @@ in
     };
   };
 
+  # Intel iGPU (Vulkan) for Ollama.
+  hardware.graphics = {
+    enable = true;
+    extraPackages = [ pkgs.intel-media-driver pkgs.vulkan-loader pkgs.mesa ];
+  };
+
   # ------------------------------------------------------------------
   # Ollama (local LLM) — exposed on the LAN so other machines (e.g. the
   # OpenCode instance on mini-pc) can use it.
@@ -155,10 +161,11 @@ in
     enable = true;
     host = "0.0.0.0";
     port = 11434;
-    package = pkgs.ollama-cpu;
+    package = pkgs.ollama-vulkan;
     openFirewall = true;
     environmentVariables = {
       OLLAMA_CONTEXT_LENGTH = "65536";
+      OLLAMA_IGPU_ENABLE = "1";
     };
     loadModels = [ "qwen3.5:9b" ];
   };
